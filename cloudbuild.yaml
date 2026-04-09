@@ -1,0 +1,24 @@
+steps:
+  # 1. 建置 Docker 映像檔
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/p-carder:$COMMIT_SHA', '.']
+
+  # 2. 推送映像檔到 Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/p-carder:$COMMIT_SHA']
+
+  # 3. 部署到 Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      [
+        'run', 'deploy', 'p-carder',
+        '--image', 'gcr.io/$PROJECT_ID/p-carder:$COMMIT_SHA',
+        '--region', 'asia-northeast1',
+        '--platform', 'managed',
+        '--allow-unauthenticated'
+      ]
+
+# 指定映像檔路徑供 Cloud Build 追蹤
+images:
+  - 'gcr.io/$PROJECT_ID/p-carder:$COMMIT_SHA'
