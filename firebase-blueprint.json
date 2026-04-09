@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user profile in the system.",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "points": { "type": "number" },
+        "userLevel": { "type": "string" },
+        "totalSpent": { "type": "number" }
+      },
+      "required": ["id", "username", "email", "role"]
+    },
+    "UserPublic": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserPublic",
+      "type": "object",
+      "description": "Public user profile data for leaderboards and lists.",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "userLevel": { "type": "string" },
+        "totalSpent": { "type": "number" }
+      },
+      "required": ["id", "username"]
+    },
+    "Announcement": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Announcement",
+      "type": "object",
+      "description": "Global notification for big prizes.",
+      "properties": {
+        "username": { "type": "string" },
+        "action": { "type": "string" },
+        "prize": { "type": "string" },
+        "prizeImageUrl": { "type": "string" },
+        "rarity": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "section": { "type": "string" }
+      }
+    },
+    "Partner": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Partner",
+      "type": "object",
+      "description": "Represents a partner organization.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "name", "logoUrl"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/backend/entities/UserProfile" },
+      "description": "Stores user profile data."
+    },
+    "/users_public/{userId}": {
+      "schema": { "$ref": "#/backend/entities/UserPublic" },
+      "description": "Publicly accessible user profile data."
+    },
+    "/announcements/{annId}": {
+      "schema": { "$ref": "#/backend/entities/Announcement" },
+      "description": "Global hall of fame data."
+    },
+    "/partners/{partnerId}": {
+      "schema": { "$ref": "#/backend/entities/Partner" },
+      "description": "Partner organizations."
+    },
+    "/systemConfig/{configId}": {
+      "schema": "object",
+      "description": "System wide configurations."
+    },
+    "/news/{newsId}": {
+      "schema": "object",
+      "description": "Latest news and updates."
+    },
+    "/wishes/{wishId}": {
+      "schema": "object",
+      "description": "User wishes and feedback."
+    },
+    "/shippingOrders/{orderId}": {
+      "schema": "object",
+      "description": "Shipping orders for physical items."
+    }
+  }
+}

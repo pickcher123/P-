@@ -1,0 +1,11 @@
+kind: AppStack
+schemaVersion: v1
+buildConfig:
+  runtime: nodejs20
+  buildCommand: npm run build
+runConfig:
+  minInstances: 0
+  maxInstances: 5
+  memory: 1024Mi
+  cpu: 1
+  startCommand: npm run start
