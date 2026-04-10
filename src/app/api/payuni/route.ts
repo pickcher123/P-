@@ -9,37 +9,41 @@ import admin from 'firebase-admin';
  * ensuring a fixed, non-alphabetical order of keys.
  */
 function createQueryString(data: Record<string, any>): string {
-    return Object.keys(data)
-        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
-        .join('&');
+    const params = new URLSearchParams();
+    for (const key in data) {
+        if (data[key] !== undefined && data[key] !== null) {
+            params.append(key, String(data[key]));
+        }
+    }
+    return params.toString();
 }
 
 /**
- * AES-GCM Encryption
+ * AES-256-CBC Encryption
  */
-function encrypt(plaintext: string, key: string, iv: Buffer): string {
-  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
-  let cipherText = cipher.update(plaintext, "utf8", "base64");
-  cipherText += cipher.final("base64");
-  const tag = cipher.getAuthTag().toString("base64");
-  return Buffer.from(`${cipherText}:::${tag}`).toString("hex").trim();
+function encrypt(plaintext: string, key: string, iv: string): string {
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  let encrypted = cipher.update(plaintext, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  return encrypted;
 }
 
 /**
  * PAYUNi SHA256 Signature
  */
 function sha256(encryptStr: string, key: string, iv: string): string {
-  const hash = crypto.createHash("sha256").update(`${key}${encryptStr}${iv}`);
+  const hashString = `HashKey=${key}&${encryptStr}&HashIV=${iv}`;
+  const hash = crypto.createHash("sha256").update(hashString);
   return hash.digest("hex").toUpperCase();
 }
 
 export async function POST(req: NextRequest) {
   try {
     // 改用原生 process.env 避免因 env.mjs 遺失導致建置失敗
-    const hashKey = process.env.PAYUNI_HASH_KEY;
-    const hashIV = process.env.PAYUNI_HASH_IV;
-    const merchantId = process.env.PAYUNI_MERCHANT_ID;
-    const apiUrl = process.env.PAYUNI_API_URL;
+    const hashKey = (process.env.PAYUNI_HASH_KEY || '').trim();
+    const hashIV = (process.env.PAYUNI_HASH_IV || '').trim();
+    const merchantId = (process.env.PAYUNI_MERCHANT_ID || '').trim();
+    const apiUrl = (process.env.PAYUNI_API_URL || '').trim();
     const appUrl = (process.env.NEXT_PUBLIC_APP_URL || '').trim().replace(/\/$/, '');
 
     if (!hashKey || !hashIV || !merchantId || !apiUrl) {
@@ -82,9 +86,8 @@ export async function POST(req: NextRequest) {
     };
     
     const plaintext = createQueryString(tradeInfoPayload);
-    const ivBuffer = Buffer.from(hashIV, 'utf8');
 
-    const encryptInfo = encrypt(plaintext, hashKey, ivBuffer);
+    const encryptInfo = encrypt(plaintext, hashKey, hashIV);
     const hashInfo = sha256(encryptInfo, hashKey, hashIV);
     
     return NextResponse.json({
