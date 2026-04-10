@@ -5,19 +5,16 @@ import querystring from 'node:querystring';
 import { adminDb } from '@/firebase/admin';
 import admin from 'firebase-admin';
 
-function decrypt(encryptStr: string, key: string, iv: Buffer): string {
+function decrypt(encryptStr: string, key: string, iv: string): string {
   try {
-    const hexDecoded = Buffer.from(encryptStr, 'hex').toString('utf8');
-    const parts = hexDecoded.split(':::');
-    if (parts.length !== 2) throw new Error("Invalid encrypted format.");
-    const [encryptData, tag] = parts;
-    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
-    decipher.setAuthTag(Buffer.from(tag, "base64"));
-    let decipherText = decipher.update(encryptData, "base64", "utf8");
-    decipherText += decipher.final("utf8");
-    return decipherText;
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    // PayUni might not use standard padding sometimes, but usually it does.
+    // decipher.setAutoPadding(false); // Only if padding issues occur
+    let decrypted = decipher.update(encryptStr, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
   } catch (error) {
-    console.error("AES-GCM decryption failed:", error);
+    console.error("AES-256-CBC decryption failed:", error);
     throw new Error("Failed to decrypt notification data.");
   }
 }
@@ -30,16 +27,22 @@ export async function POST(req: NextRequest) {
 
     if (status !== 'SUCCESS') return NextResponse.json({ status: 'success' });
 
-    const hashKey = process.env.PAYUNI_HASH_KEY;
-    const hashIV = process.env.PAYUNI_HASH_IV;
+    const hashKey = (process.env.PAYUNI_HASH_KEY || '').trim();
+    const hashIV = (process.env.PAYUNI_HASH_IV || '').trim();
 
     if (!hashKey || !hashIV || !adminDb) {
         return NextResponse.json({ status: 'success' });
     }
 
-    const ivBuffer = Buffer.from(hashIV, 'utf8');
-    const decryptedString = decrypt(encryptInfo, hashKey, ivBuffer);
-    const result = querystring.parse(decryptedString);
+    const decryptedString = decrypt(encryptInfo, hashKey, hashIV);
+    
+    let result: any;
+    try {
+        result = JSON.parse(decryptedString);
+        if (result.Result) result = result.Result;
+    } catch (e) {
+        result = querystring.parse(decryptedString);
+    }
 
     const { TradeAmt, MerTradeNo, TradeNo, TradeStatus } = result;
     const amount = Number(TradeAmt);
