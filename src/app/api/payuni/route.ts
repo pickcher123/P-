@@ -90,6 +90,21 @@ export async function POST(req: NextRequest) {
     const encryptInfo = encrypt(plaintext, hashKey, hashIV);
     const hashInfo = sha256(encryptInfo, hashKey, hashIV);
     
+    // --- 加入 Debug Log 讓使用者可以提供給客服 ---
+    console.log('\n========== PAYUNI DEBUG INFO ==========');
+    console.log('1. 原始交易資料 (Plaintext):', plaintext);
+    console.log('2. 加密後字串 (EncryptInfo):', encryptInfo);
+    console.log('3. 壓碼前字串 (Hash String):', `HashKey=${hashKey}&${encryptInfo}&HashIV=${hashIV}`);
+    console.log('4. 壓碼後字串 (HashInfo):', hashInfo);
+    console.log('5. 最終 POST 參數:', {
+      ApiUrl: apiUrl,
+      MerID: merchantId,
+      Version: '2.0',
+      EncryptInfo: encryptInfo,
+      HashInfo: hashInfo,
+    });
+    console.log('=======================================\n');
+
     return NextResponse.json({
       ApiUrl: apiUrl,
       MerID: merchantId,
