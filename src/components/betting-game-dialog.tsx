@@ -99,6 +99,10 @@ export function BettingGameDialog({ card, children, categoryName, onSpinStart, o
         if (onSpinStart) onSpinStart(); setIsProcessing(true); setResult(null);
         try {
             const transactionResult = await runTransaction(firestore, async (transaction) => {
+                const cardRef = doc(firestore, 'allCards', card.id);
+                const cardSnap = await transaction.get(cardRef);
+                if (cardSnap.data()?.isSold) throw new Error("此卡片已被贏走，請重新整理後再試。");
+
                 const userRef = doc(firestore, 'users', user.uid);
                 const uSnap = await transaction.get(userRef);
                 const userData = uSnap.data() as UserProfile;

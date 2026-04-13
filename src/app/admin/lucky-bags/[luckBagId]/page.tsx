@@ -73,6 +73,7 @@ interface LuckBag {
 
 interface LuckBagPurchase {
   userId: string;
+  username: string;
   spotNumber: number;
 }
 
@@ -121,9 +122,6 @@ export default function LuckBagDetailPage() {
     return query(collection(firestore, 'luckBags', luckBagId, 'luckBagPurchases'));
   }, [firestore, luckBagId]);
   const { data: purchases, isLoading: isLoadingPurchases } = useCollection<LuckBagPurchase>(purchasesQuery);
-
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
-  const { data: allUsers, isLoading: isLoadingUsers } = useCollection<UserProfile>(usersQuery);
 
   // Cross-area logic
   const { data: allCardPools } = useCollection<any>(useMemoFirebase(() => firestore ? collection(firestore, 'cardPools') : null, [firestore]));
@@ -182,11 +180,10 @@ export default function LuckBagDetailPage() {
 
 
   const participantList = useMemo(() => {
-    if (!purchases || !allUsers) return [];
-    const userMap = new Map(allUsers.map(u => [u.id, u.username]));
+    if (!purchases) return [];
     const list = purchases.map(p => ({
         ...p,
-        username: userMap.get(p.userId) || '未知用戶'
+        username: p.username || '未知用戶'
     })).sort((a, b) => a.spotNumber - b.spotNumber);
 
     if (!searchTerm) return list;
@@ -195,13 +192,13 @@ export default function LuckBagDetailPage() {
         p.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.spotNumber.toString().includes(searchTerm)
     );
-  }, [purchases, allUsers, searchTerm]);
+  }, [purchases, searchTerm]);
 
   const userMap = useMemo(() => {
     const map = new Map<string, string>();
-    allUsers?.forEach(u => map.set(u.id, u.username));
+    purchases?.forEach(p => map.set(p.userId, p.username || '未知用戶'));
     return map;
-  }, [allUsers]);
+  }, [purchases]);
 
 
   useEffect(() => {

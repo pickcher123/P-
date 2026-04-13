@@ -149,7 +149,7 @@ export function LuckBagDetailView({ luckBag }: { luckBag: LuckBagWithCount }) {
         const currency = luckBag.currency || 'p-point';
         try {
              await runTransaction(firestore, async (transaction) => {
-                const totalCost = selectedSpots.size * luckBag.price;
+                const totalCost = selectedSpots.size * (luckBag.price || 0);
                 const userRef = doc(firestore, 'users', user.uid);
                 const uSnap = await transaction.get(userRef);
                 const userData = uSnap.data() as UserProfile;
@@ -158,6 +158,16 @@ export function LuckBagDetailView({ luckBag }: { luckBag: LuckBagWithCount }) {
                 if (walletBalance < totalCost) throw new Error("點數餘額不足");
                 
                 const purchasesRef = collection(firestore, 'luckBags', luckBag.id, 'luckBagPurchases');
+                
+                // Check if any spot is already taken
+                for (const spot of selectedSpots) {
+                    const spotRef = doc(purchasesRef, spot.toString());
+                    const spotSnap = await transaction.get(spotRef);
+                    if (spotSnap.exists()) {
+                        throw new Error(`號碼 ${spot} 已經被選走了，請重新選擇`);
+                    }
+                }
+
                 for (const spot of selectedSpots) {
                     transaction.set(doc(purchasesRef, spot.toString()), { 
                         userId: user.uid, 
@@ -210,7 +220,7 @@ export function LuckBagDetailView({ luckBag }: { luckBag: LuckBagWithCount }) {
                             <h1 className="font-headline text-base md:text-lg font-black text-slate-900 uppercase truncate">{luckBag.name}</h1>
                             <div className="flex items-center gap-1 mt-1 md:mt-2">
                                 {currency === 'p-point' ? <PPlusIcon className="w-4 h-4 md:w-5 md:h-5" /> : <Gem className="w-4 h-4 md:w-5 md:h-5 text-primary" />}
-                                <p className="font-black text-xl md:text-2xl text-accent font-code">{luckBag.price.toLocaleString()}</p>
+                                <p className="font-black text-xl md:text-2xl text-accent font-code">{(luckBag.price || 0).toLocaleString()}</p>
                             </div>
                         </div>
                         <div className="space-y-4 md:space-y-6 flex-1 flex flex-col justify-between">
@@ -297,7 +307,7 @@ export function LuckBagDetailView({ luckBag }: { luckBag: LuckBagWithCount }) {
                                 <div className="w-full sm:w-auto text-center sm:text-left">
                                     <p className="text-[8px] md:text-[9px] font-black text-slate-500 uppercase">預計支付金額</p>
                                     <div className="flex items-center justify-center sm:justify-start gap-1.5 md:gap-2 text-3xl md:text-4xl font-black font-code text-accent">
-                                        {(selectedSpots.size * luckBag.price).toLocaleString()}
+                                        {(selectedSpots.size * (luckBag.price || 0)).toLocaleString()}
                                         {currency === 'diamond' ? <Gem className="w-6 h-6 md:w-8 md:h-8 text-primary" /> : <PPlusIcon className="w-6 h-6 md:w-8 md:h-8" />}
                                     </div>
                                 </div>
@@ -430,7 +440,7 @@ export function LuckBagDetailView({ luckBag }: { luckBag: LuckBagWithCount }) {
                     <AlertDialogHeader>
                         <AlertDialogTitle className="font-black italic text-xl md:text-2xl uppercase tracking-tighter">系統交易確認</AlertDialogTitle>
                         <AlertDialogDescription className="text-slate-600 font-bold space-y-3 md:space-y-4">
-                            <p className="text-sm md:text-base">確定要支付 {(selectedSpots.size * luckBag.price).toLocaleString()} {currency === 'diamond' ? '鑽石' : 'P+'} 購買所選的 {selectedSpots.size} 個位置嗎？</p>
+                            <p className="text-sm md:text-base">確定要支付 {(selectedSpots.size * (luckBag.price || 0)).toLocaleString()} {currency === 'diamond' ? '鑽石' : 'P+'} 購買所選的 {selectedSpots.size} 個位置嗎？</p>
                             <div className="p-3 md:p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-left text-[10px] md:text-[11px] leading-tight md:leading-relaxed space-y-1 md:space-y-1.5">
                                 <p className="font-black text-destructive flex items-center gap-2"><HelpCircle className="w-3.5 h-3.5" /> 購買守則提示：</p>
                                 <ul className="list-none pl-0 space-y-1 font-bold">

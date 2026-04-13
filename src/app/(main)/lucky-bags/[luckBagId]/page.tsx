@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
-import { doc, collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, collection, getDocs, query, where, getCountFromServer } from 'firebase/firestore';
 import { LuckBagDetailView } from '@/components/luck-bag-detail-view';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -34,8 +34,8 @@ export default function LuckyBagPage() {
             setIsLoading(true);
             try {
                 const purchasesColRef = collection(firestore, 'luckBags', rawLuckBag.id, 'luckBagPurchases');
-                const purchasesSnapshot = await getDocs(query(purchasesColRef));
-                const participantCount = purchasesSnapshot.size;
+                const countSnapshot = await getCountFromServer(query(purchasesColRef));
+                const participantCount = countSnapshot.data().count;
 
                 const cardMap = new Map(allCards.map(c => [c.id, c]));
 
