@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, addDoc, getDocs, query, deleteDoc, doc, updateDoc, writeBatch, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, deleteDoc, doc, updateDoc, writeBatch, orderBy, getCountFromServer } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -41,6 +41,7 @@ import { useRouter } from 'next/navigation';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { PPlusIcon } from '@/components/icons';
 
 type LuckBagStatus = 'draft' | 'published';
 
@@ -101,8 +102,8 @@ export default function LuckyBagsAdminPage() {
             sortedLuckyBags.map(async (bag) => {
                 if (!bag.id) return { ...bag, participantCount: 0 };
                 const purchasesColRef = collection(firestore, 'luckBags', bag.id, 'luckBagPurchases');
-                const purchasesSnapshot = await getDocs(query(purchasesColRef));
-                const participantCount = purchasesSnapshot.size;
+                const countSnapshot = await getCountFromServer(query(purchasesColRef));
+                const participantCount = countSnapshot.data().count;
 
                 return {
                     ...bag,
@@ -276,7 +277,10 @@ export default function LuckyBagsAdminPage() {
                         </button>
                     </TableCell>
                     <TableCell className="font-code font-bold text-accent">
-                        {bag.price.toLocaleString()} P
+                        <div className="flex items-center gap-1">
+                            {(bag.price || 0).toLocaleString()}
+                            {bag.currency === 'diamond' ? <Gem className="w-4 h-4 text-primary" /> : <PPlusIcon className="w-4 h-4" />}
+                        </div>
                     </TableCell>
                     <TableCell className="font-code text-sm">
                         <div className="flex items-center gap-2">

@@ -36,6 +36,8 @@ interface CardData {
     dailyLimit?: number;
     minLevel?: string;
     isFeatured?: boolean;
+    lockedBy?: string;
+    lockedAt?: any;
 }
 
 const DEFAULT_LEVELS = [
@@ -99,6 +101,18 @@ export function BettingGameDialog({ card, children, categoryName, onSpinStart, o
         if (onSpinStart) onSpinStart(); setIsProcessing(true); setResult(null);
         try {
             const transactionResult = await runTransaction(firestore, async (transaction) => {
+                const cardRef = doc(firestore, 'allCards', card.id);
+                const cardSnap = await transaction.get(cardRef);
+                const cardData = cardSnap.data();
+                if (cardData?.isSold) throw new Error("此卡片已被贏走，請重新整理後再試。");
+                
+                // Lock check
+                if (cardData?.lockedBy && cardData.lockedBy !== user.uid && cardData.lockedAt && (Date.now() - cardData.lockedAt.toMillis() < 30000)) {
+                    throw new Error("此卡片正在被其他人拼，請稍候再試。");
+                }
+                
+                const cardUpdates: any = { lockedBy: user.uid, lockedAt: serverTimestamp() };
+
                 const userRef = doc(firestore, 'users', user.uid);
                 const uSnap = await transaction.get(userRef);
                 const userData = uSnap.data() as UserProfile;
@@ -127,9 +141,14 @@ export function BettingGameDialog({ card, children, categoryName, onSpinStart, o
                         category: card.category, 
                         source: 'betting' 
                     });
-                    transaction.update(doc(firestore, 'allCards', card.id), { isSold: true });
-                    transaction.update(doc(firestore, 'betting-items', decodeURIComponent(categoryName)), { soldCardIds: arrayUnion(card.id) });
+                    cardUpdates.isSold = true;
+                    if (decodeURIComponent(categoryName) !== 'all') {
+                        transaction.update(doc(firestore, 'betting-items', decodeURIComponent(categoryName)), { soldCardIds: arrayUnion(card.id) });
+                    }
                 }
+                
+                transaction.update(cardRef, cardUpdates);
+                
                 return { spot: winningSpot, won: didWin };
             });
             if (spinnerRef.current) {

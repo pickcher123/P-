@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Card as UICard, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Trash2, Image as ImageIcon, Upload, ArrowLeft, Check, Settings, Gem, Package, Users, Trophy, Eye, EyeOff, Search, Loader2, Sparkles, Copy, ListChecks, UserCheck, Archive } from 'lucide-react';
+import { PlusCircle, Trash2, Image as ImageIcon, Upload, ArrowLeft, Check, Settings, Gem, Package, Users, Trophy, Eye, EyeOff, Search, Loader2, Sparkles, Copy, ListChecks, UserCheck, Archive, Play } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -73,6 +73,7 @@ interface LuckBag {
 
 interface LuckBagPurchase {
   userId: string;
+  username: string;
   spotNumber: number;
 }
 
@@ -121,9 +122,6 @@ export default function LuckBagDetailPage() {
     return query(collection(firestore, 'luckBags', luckBagId, 'luckBagPurchases'));
   }, [firestore, luckBagId]);
   const { data: purchases, isLoading: isLoadingPurchases } = useCollection<LuckBagPurchase>(purchasesQuery);
-
-  const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
-  const { data: allUsers, isLoading: isLoadingUsers } = useCollection<UserProfile>(usersQuery);
 
   // Cross-area logic
   const { data: allCardPools } = useCollection<any>(useMemoFirebase(() => firestore ? collection(firestore, 'cardPools') : null, [firestore]));
@@ -182,11 +180,10 @@ export default function LuckBagDetailPage() {
 
 
   const participantList = useMemo(() => {
-    if (!purchases || !allUsers) return [];
-    const userMap = new Map(allUsers.map(u => [u.id, u.username]));
+    if (!purchases) return [];
     const list = purchases.map(p => ({
         ...p,
-        username: userMap.get(p.userId) || '未知用戶'
+        username: p.username || '未知用戶'
     })).sort((a, b) => a.spotNumber - b.spotNumber);
 
     if (!searchTerm) return list;
@@ -195,13 +192,13 @@ export default function LuckBagDetailPage() {
         p.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.spotNumber.toString().includes(searchTerm)
     );
-  }, [purchases, allUsers, searchTerm]);
+  }, [purchases, searchTerm]);
 
   const userMap = useMemo(() => {
     const map = new Map<string, string>();
-    allUsers?.forEach(u => map.set(u.id, u.username));
+    purchases?.forEach(p => map.set(p.userId, p.username || '未知用戶'));
     return map;
-  }, [allUsers]);
+  }, [purchases]);
 
 
   useEffect(() => {
@@ -515,7 +512,7 @@ export default function LuckBagDetailPage() {
     ]);
 
     return allCards.filter(c => 
-        !c.isSold || 
+        (!c.isSold && !globallyAssignedCardIds.has(c.id)) || 
         currentBagCardIds.has(c.id)
     );
   }, [allCards, globallyAssignedCardIds, luckBag]);
@@ -565,6 +562,15 @@ export default function LuckBagDetailPage() {
                         }
                     </Label>
                 </div>
+                {bagDetails.status === 'published' && !bagDetails.revealLottery && (
+                    <Button 
+                        variant="default" 
+                        className="bg-primary hover:bg-primary/90 text-white font-bold ml-4"
+                        onClick={() => handleUpdateBagDetails('revealLottery', true)}
+                    >
+                        <Play className="mr-2 h-4 w-4" /> 啟動開獎模式
+                    </Button>
+                )}
             </div>
         </div>
 

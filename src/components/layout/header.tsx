@@ -59,7 +59,7 @@ export function Header({ systemConfig }: { systemConfig: SystemConfig | null }) 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center px-4 md:px-8">
-        <div className="mr-auto flex items-center ml-1 mt-1">
+        <div className="mr-auto flex items-center ml-1">
           <Logo className="text-primary" />
           <nav className="ml-6 hidden items-center space-x-6 text-sm font-medium md:flex">
             {navLinks.map((link) => {
@@ -97,15 +97,15 @@ export function Header({ systemConfig }: { systemConfig: SystemConfig | null }) 
             )}
              {user && (
                 <div className="flex items-center">
-                    <div className="flex items-center font-code text-[11px] sm:text-sm font-semibold bg-secondary/50 rounded-xl dark:bg-card/50 overflow-hidden border border-white/5 backdrop-blur-md shadow-lg mt-2">
+                    <div className="flex items-center font-code text-[10px] sm:text-xs font-semibold bg-secondary/50 rounded-xl dark:bg-card/50 overflow-hidden border border-white/5 backdrop-blur-md shadow-lg">
                         <Popover>
                             <PopoverTrigger asChild>
-                                <div className="flex items-center px-3.5 sm:px-5 py-2 cursor-pointer hover:bg-white/5 transition-all group">
-                                    <Gem className="mr-1.5 sm:mr-2 h-4 sm:h-5 w-4 sm:w-5 text-primary drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
-                                    <span className="text-foreground dark:text-white drop-shadow-md truncate max-w-[80px] sm:max-w-none">
+                                <div className="flex items-center px-3 sm:px-4 py-1.5 cursor-pointer hover:bg-white/5 transition-all group">
+                                    <Gem className="mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-primary drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+                                    <span className="text-foreground dark:text-white drop-shadow-md truncate min-w-[40px] max-w-[90px] sm:max-w-none text-center">
                                         {isProfileLoading ? '...' : (userProfile?.points ?? 0).toLocaleString()}
                                     </span>
-                                    <ChevronDown className="ml-1 sm:ml-2 h-3 w-3 opacity-30 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all" />
+                                    <ChevronDown className="ml-1 sm:ml-1.5 h-2.5 w-2.5 opacity-30 group-hover:opacity-100 group-hover:translate-y-0.5 transition-all" />
                                 </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-64 p-5 bg-card/95 backdrop-blur-3xl border-primary/20 rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-200" align="end" sideOffset={12}>
@@ -138,8 +138,8 @@ export function Header({ systemConfig }: { systemConfig: SystemConfig | null }) 
                         </Popover>
                         <div className="border-l border-white/10">
                             <PurchasePointsDialog>
-                                <Button variant="ghost" size="icon" className="h-10 w-9 sm:w-10 rounded-none hover:bg-primary/20 text-muted-foreground hover:text-primary transition-all group">
-                                    <Plus className="h-4 w-4 sm:h-5 sm:w-5 group-hover:scale-125 transition-transform" />
+                                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 rounded-none hover:bg-primary/20 text-muted-foreground hover:text-primary transition-all group">
+                                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 group-hover:scale-125 transition-transform" />
                                 </Button>
                             </PurchasePointsDialog>
                         </div>
@@ -154,7 +154,7 @@ export function Header({ systemConfig }: { systemConfig: SystemConfig | null }) 
               ) : user ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                    <button className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:scale-105 transition-all active:scale-95 outline-none ml-1 mt-1">
+                    <button className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:scale-105 transition-all active:scale-95 outline-none ml-1">
                         <MemberLevelCrown level={userProfile?.userLevel || '新手收藏家'} size="sm" />
                     </button>
                     </DropdownMenuTrigger>

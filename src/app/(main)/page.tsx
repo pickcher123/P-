@@ -253,64 +253,72 @@ export default function Home() {
                 desc: '數十款主題卡池，獨家傳奇巨星與限時最後賞等你入袋。體驗真實撕開卡包的悸動感。', 
                 icon: Package, 
                 href: '/draw', 
-                color: 'text-primary',
-                bg: 'bg-primary/5',
-                border: 'border-primary/20'
+                color: 'text-amber-400',
+                bg: 'bg-slate-950',
+                border: 'border-amber-400/30',
+                hoverGlow: 'hover:shadow-[0_0_40px_rgba(251,191,36,0.4)] hover:border-amber-400/80',
+                iconBg: 'bg-amber-400/10'
             },
             { 
                 title: '拼卡競技', 
                 desc: '高風險高回報的幸運輪盤。自由挑選幸運號碼，1/10 中獎機率挑戰您的命運極限。', 
                 icon: CrossedCardsIcon, 
                 href: '/bet', 
-                color: 'text-destructive',
-                bg: 'bg-destructive/5',
-                border: 'border-destructive/20'
+                color: 'text-cyan-400',
+                bg: 'bg-zinc-950',
+                border: 'border-cyan-500/30',
+                hoverGlow: 'hover:shadow-[inset_0_0_20px_rgba(6,182,212,0.3),0_0_20px_rgba(6,182,212,0.4)] hover:border-cyan-500/80',
+                iconBg: 'bg-cyan-500/10'
             },
             { 
                 title: '幸運福袋', 
                 desc: '經典福袋募集機制，滿團即開！保證出土頂級大獎，每一格都蘊含翻轉價值的可能。', 
                 icon: LuckyBagIcon, 
                 href: '/lucky-bags', 
-                color: 'text-accent',
-                bg: 'bg-accent/5',
-                border: 'border-accent/20'
+                color: 'text-fuchsia-500',
+                bg: 'bg-indigo-950',
+                border: 'border-fuchsia-500/30',
+                hoverGlow: 'hover:shadow-[0_0_30px_rgba(217,70,239,0.5)] hover:border-fuchsia-500/80',
+                iconBg: 'bg-fuchsia-500/10'
             },
             { 
                 title: '團拆活動', 
                 desc: '精彩直播互動團拆，享受與其他藏友共享開箱的狂熱瞬間。公平配對，全場見證。', 
                 icon: Users2, 
                 href: '/group-break', 
-                color: 'text-green-400',
-                bg: 'bg-green-400/5',
-                border: 'border-green-400/20'
+                color: 'text-rose-500',
+                bg: 'bg-neutral-900',
+                border: 'border-rose-500/30',
+                hoverGlow: 'hover:shadow-[0_0_30px_rgba(225,29,72,0.4)] hover:border-rose-500/80',
+                iconBg: 'bg-rose-500/10'
             },
           ].map((item, i) => (
             <Link 
                 key={i} 
                 href={item.href} 
                 className={cn(
-                    "group relative p-8 md:p-12 xl:p-16 rounded-[3rem] border transition-all duration-500 hover:-translate-y-3 shadow-2xl backdrop-blur-md overflow-hidden min-h-[380px] md:min-h-[420px] flex flex-col justify-between",
-                    item.bg, item.border, "hover:border-white/20"
+                    "group relative p-8 md:p-12 xl:p-16 rounded-[3rem] border transition-all duration-500 hover:-translate-y-3 shadow-2xl overflow-hidden min-h-[380px] md:min-h-[420px] flex flex-col justify-between active:scale-[0.98]",
+                    item.bg, item.border, item.hoverGlow
                 )}
             >
               <div className="absolute top-10 right-10 flex gap-2 opacity-5 group-hover:opacity-20 transition-opacity pointer-events-none">
-                  <div className="w-8 h-8 rounded-full bg-white" />
-                  <div className="w-8 h-8 rounded-full bg-white" />
+                  <div className={cn("w-8 h-8 rounded-full", item.iconBg)} />
+                  <div className={cn("w-8 h-8 rounded-full", item.iconBg)} />
               </div>
               
               <div>
-                <div className={cn("inline-flex p-5 md:p-6 rounded-[2rem] bg-black/20 mb-8 md:mb-10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-inner", item.color)}>
+                <div className={cn("inline-flex p-5 md:p-6 rounded-[2rem] mb-8 md:mb-10 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-inner", item.iconBg, item.color)}>
                     <item.icon className="w-10 h-10 md:w-14 md:h-14" />
                 </div>
                 
                 <div className="space-y-3 md:space-y-4 text-left">
-                    <h3 className="text-3xl md:text-5xl font-black font-headline tracking-tighter text-white drop-shadow-md">{item.title}</h3>
-                    <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium line-clamp-2 md:line-clamp-none">{item.desc}</p>
+                    <h3 className={cn("text-3xl md:text-5xl font-black font-headline tracking-tighter drop-shadow-md transition-colors duration-500", item.color)}>{item.title}</h3>
+                    <p className="text-base md:text-lg text-white/70 leading-relaxed font-medium line-clamp-2 md:line-clamp-none">{item.desc}</p>
                 </div>
               </div>
               
-              <div className="mt-8 md:mt-12 flex items-center text-sm md:text-base font-black font-headline tracking-[0.3em] text-primary group-hover:text-white transition-all duration-500 uppercase">
-                ENTER <ChevronRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+              <div className={cn("mt-8 md:mt-12 flex items-center text-sm md:text-base font-black font-headline tracking-[0.3em] transition-all duration-500 uppercase", item.color)}>
+                ENTER <ChevronRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-2 transition-transform" />
               </div>
             </Link>
           ))}
@@ -384,7 +392,7 @@ export default function Home() {
             selectedNews?.type === 'image' ? "max-w-4xl" : "max-w-2xl"
         )}>
           <DialogHeader className="sr-only">
-            <DialogTitle>{selectedNews?.title}</DialogTitle>
+            <DialogTitle>{selectedNews?.title || '最新消息'}</DialogTitle>
             <DialogDescription>最新消息詳情</DialogDescription>
           </DialogHeader>
           

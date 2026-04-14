@@ -55,6 +55,8 @@ interface CardData {
     dailyLimit?: number;
     minLevel?: string;
     isFeatured?: boolean;
+    lockedBy?: string;
+    lockedAt?: any;
 }
 
 interface BettingCategory {
@@ -120,6 +122,15 @@ function DirectPurchaseDialog({ card, children, categoryName }: { card: CardData
         setIsProcessing(true);
         try {
             await runTransaction(firestore, async (transaction) => {
+                const cardRef = doc(firestore, 'allCards', card.id);
+                const cardSnap = await transaction.get(cardRef);
+                const cardData = cardSnap.data();
+                if (cardData?.isSold) throw new Error("此卡片已被購買，請重新整理後再試。");
+                
+                if (cardData?.lockedBy && cardData.lockedBy !== user.uid && cardData.lockedAt && (Date.now() - cardData.lockedAt.toMillis() < 30000)) {
+                    throw new Error("此卡片正在被其他人拼，請稍候再試。");
+                }
+
                 const userRef = doc(firestore, 'users', user.uid);
                 const uSnap = await transaction.get(userRef);
                 const userData = uSnap.data() as UserProfile;
@@ -139,7 +150,9 @@ function DirectPurchaseDialog({ card, children, categoryName }: { card: CardData
                     source: 'direct-buy' 
                 });
                 transaction.update(doc(firestore, 'allCards', card.id), { isSold: true });
-                transaction.update(doc(firestore, 'betting-items', decodeURIComponent(categoryName)), { soldCardIds: arrayUnion(card.id) });
+                if (decodeURIComponent(categoryName) !== 'all') {
+                    transaction.update(doc(firestore, 'betting-items', decodeURIComponent(categoryName)), { soldCardIds: arrayUnion(card.id) });
+                }
                 transaction.set(doc(collection(firestore, 'transactions')), { userId: user.uid, targetId: card.id, transactionType: 'Purchase', section: 'betting', currency: paymentCurrency, amount: -finalPrice, details: `Direct purchase: ${card.name}`, transactionDate: serverTimestamp() });
             });
             toast({ title: '購買成功！' });
@@ -278,7 +291,7 @@ export default function BetCategoryPage() {
                                 <div className={cn("w-full aspect-[2.5/4] relative cursor-zoom-in", isSold && "grayscale opacity-30")} onClick={() => !isSold && setPreviewCard(card)}>
                                     <Image src={card.imageUrl} alt={card.name} fill className="object-contain" sizes="(max-width: 768px) 50vw, 25vw" />
                                 </div>
-                                {isSold && <div className="absolute inset-0 flex items-center justify-center"><Badge className="bg-destructive text-white font-black px-4 py-1 rotate-[-12deg] uppercase">已售罄</Badge></div>}
+                                {isSold && <div className="absolute inset-0 flex items-center justify-center"><Badge className="bg-destructive text-white font-black px-4 py-1 rotate-[-12deg] uppercase">已售出</Badge></div>}
                             </div>
                             <div className="mt-3 space-y-2">
                                 <div className="flex flex-wrap gap-1">

@@ -9,6 +9,16 @@ function getAdminApp() {
   
   if (!admin.apps.length) {
     try {
+      if (process.env.FIREBASE_PRIVATE_KEY) {
+        return admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            // 處理 Vercel 環境變數中的換行字元
+            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          }),
+        });
+      }
       return admin.initializeApp();
     } catch (error) {
       console.error('Firebase admin initialization error details:', error);

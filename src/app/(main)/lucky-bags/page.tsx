@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Users, Gem, Trophy, Package, ChevronDown, ChevronUp, Sparkles, ChevronRight, Settings, Disc3, Info } from 'lucide-react';
 import { LuckyBagIcon, PPlusIcon } from '@/components/icons';
 import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
-import { collection, query, getDocs, orderBy, doc } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, doc, getCountFromServer } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { SafeImage } from '@/components/safe-image';
@@ -67,7 +67,7 @@ export interface LuckBagWithCount extends LuckBag {
 const LuckBagCard = ({ bag, priority = false, index }: { bag: LuckBagWithCount, priority?: boolean, index: number }) => {
     const isDone = bag.status === '已開獎';
     const currency = bag.currency || 'p-point';
-    const progress = (bag.participantCount / bag.totalParticipants) * 100;
+    const progress = (bag.participantCount / (bag.totalParticipants || 1)) * 100;
 
     return (
          <Link 
@@ -103,8 +103,8 @@ const LuckBagCard = ({ bag, priority = false, index }: { bag: LuckBagWithCount, 
                                 {bag.name}
                             </h3>
                             <div className="flex flex-wrap items-center gap-2">
-                                <Badge variant={isDone ? "secondary" : "default"} className="font-black text-[9px] md:text-[10px] uppercase h-5 px-2 border-none">
-                                    {isDone ? '已開獎' : '募集進行中'}
+                                <Badge variant={isDone ? "secondary" : bag.revealLottery ? "destructive" : "default"} className="font-black text-[9px] md:text-[10px] uppercase h-5 px-2 border-none">
+                                    {isDone ? '已開獎' : bag.revealLottery ? '開獎中' : '募集進行中'}
                                 </Badge>
                                 {isDone && bag.winners?.first && (
                                     <span className="text-[10px] font-black text-primary italic uppercase tracking-widest">
@@ -124,7 +124,7 @@ const LuckBagCard = ({ bag, priority = false, index }: { bag: LuckBagWithCount, 
                                 <p className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">每格參與價格</p>
                                 <div className="flex items-center gap-2">
                                     <p className="text-2xl md:text-4xl font-black text-accent font-code leading-none">
-                                        {bag.price.toLocaleString()}
+                                        {(bag.price || 0).toLocaleString()}
                                     </p>
                                     {currency === 'diamond' ? <Gem className="w-5 h-5 md:w-6 md:h-6 text-primary" /> : <PPlusIcon className="w-5 h-5 md:w-6 md:h-6" />}
                                 </div>
@@ -196,8 +196,8 @@ export default function LuckyBagsPage() {
             const bagsWithData = await Promise.all(
                 allLuckyBags.map(async (bag) => {
                     const purchasesColRef = collection(firestore, 'luckBags', bag.id, 'luckBagPurchases');
-                    const purchasesSnapshot = await getDocs(query(purchasesColRef));
-                    const participantCount = purchasesSnapshot.size;
+                    const countSnapshot = await getCountFromServer(query(purchasesColRef));
+                    const participantCount = countSnapshot.data().count;
 
                     const prizeCards = {
                         first: bag.prizes?.first ? cardMap.get(bag.prizes.first) : undefined,

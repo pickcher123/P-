@@ -126,41 +126,41 @@ export default function DrawPage() {
 
   return (
     <div className="container py-6 md:py-10 relative overflow-hidden px-4 md:px-8">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/5 blur-[120px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-amber-500/5 blur-[120px] pointer-events-none" />
         
         {/* 右上角規則按鈕 */}
         <div className="absolute top-4 right-4 md:top-8 md:right-10 z-30">
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 w-9 md:w-auto px-0 md:px-4 rounded-full border-white/10 bg-white/5 backdrop-blur-md hover:bg-primary/10 hover:border-primary/30 text-white font-bold transition-all gap-2">
-                        <Info className="h-4 w-4 text-primary" />
+                    <Button variant="outline" size="sm" className="h-9 w-9 md:w-auto px-0 md:px-4 rounded-full border-white/10 bg-white/5 backdrop-blur-md hover:bg-amber-500/10 hover:border-amber-500/30 text-white font-bold transition-all gap-2">
+                        <Info className="h-4 w-4 text-amber-400" />
                         <span className="text-xs uppercase tracking-widest hidden md:inline">遊戲規則</span>
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-[2.5rem] bg-background/95 backdrop-blur-2xl border-primary/20 shadow-2xl">
+                <DialogContent className="rounded-[2.5rem] bg-slate-950 backdrop-blur-2xl border-amber-500/20 shadow-[0_0_50px_rgba(251,191,36,0.15)]">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-black font-headline text-primary italic tracking-tighter uppercase">RULES OF ENGAGEMENT</DialogTitle>
+                        <DialogTitle className="text-2xl font-black font-headline text-amber-400 italic tracking-tighter uppercase">RULES OF ENGAGEMENT</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-5 text-sm text-white/80 leading-relaxed py-2">
                         <div className="p-5 rounded-3xl bg-white/5 border border-white/10 space-y-4">
                             <p className="flex items-start gap-4">
-                                <span className="text-primary font-black font-code text-lg shrink-0">01.</span>
+                                <span className="text-amber-400 font-black font-code text-lg shrink-0">01.</span>
                                 <span>玩家消耗點數從卡池中抽取獎品。</span>
                             </p>
                             <p className="flex items-start gap-4">
-                                <span className="text-primary font-black font-code text-lg shrink-0">02.</span>
+                                <span className="text-amber-400 font-black font-code text-lg shrink-0">02.</span>
                                 <span>每個卡池包含一組特定的卡片和點數獎項，每個獎項都有不同的稀有度。</span>
                             </p>
                             <p className="flex items-start gap-4">
-                                <span className="text-primary font-black font-code text-lg shrink-0">03.</span>
+                                <span className="text-amber-400 font-black font-code text-lg shrink-0">03.</span>
                                 <span>每個稀有度的中獎機率都會在卡池資訊中明確列出。</span>
                             </p>
                             <p className="flex items-start gap-4">
-                                <span className="text-primary font-black font-code text-lg shrink-0">04.</span>
+                                <span className="text-amber-400 font-black font-code text-lg shrink-0">04.</span>
                                 <span>抽出的卡片會自動加入您的「收藏庫」。</span>
                             </p>
                             <p className="flex items-start gap-4">
-                                <span className="text-primary font-black font-code text-lg shrink-0">05.</span>
+                                <span className="text-amber-400 font-black font-code text-lg shrink-0">05.</span>
                                 <span className="flex flex-wrap items-center">
                                     <span className="text-accent font-bold underline underline-offset-4 mr-1">保護機制</span>：具備 120s 鎖定期，保障開獎流暢度。
                                 </span>
@@ -173,7 +173,7 @@ export default function DrawPage() {
 
         <div className="text-center mb-2 md:mb-1 relative z-10 space-y-1">
             <div className="flex justify-center">
-                <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase animate-fade-in-up">
+                <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase animate-fade-in-up shadow-[0_0_15px_rgba(251,191,36,0.2)]">
                     <Sparkles className="w-2.5 h-2.5" /> SELECT YOUR DESTINY
                 </div>
             </div>
@@ -186,9 +186,9 @@ export default function DrawPage() {
         
         <div className="mb-3 md:mb-4 flex items-center justify-between animate-fade-in-up px-4 md:px-8">
             <h2 className="flex items-center text-sm md:text-lg font-bold font-headline text-white tracking-widest text-left">
-                <span className="flex items-center"><Disc3 className="w-4 h-4 md:w-5 md:h-5 mr-3 text-primary animate-spin-slow shrink-0" />選擇主題</span>
+                <span className="flex items-center"><Disc3 className="w-4 h-4 md:w-5 md:h-5 mr-3 text-amber-400 animate-spin-slow shrink-0" />選擇主題</span>
             </h2>
-            <div className="h-px flex-1 mx-4 md:mx-6 bg-gradient-to-r from-primary/30 to-transparent hidden sm:block" />
+            <div className="h-px flex-1 mx-4 md:mx-6 bg-gradient-to-r from-amber-500/30 to-transparent hidden sm:block" />
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12 max-w-7xl mx-auto">

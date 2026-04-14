@@ -251,7 +251,7 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
 
     return (
         <Dialog>
-            <div className="relative flex flex-col p-2 bg-slate-900 border-[8px] border-slate-950 rounded-[2.5rem] shadow-2xl group transition-all duration-500 hover:-translate-y-2 [perspective:1000px]">
+            <div className="relative flex flex-col p-2 bg-slate-900 border-[8px] border-slate-950 rounded-[2.5rem] shadow-2xl group transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(251,191,36,0.3)] [perspective:1000px]">
                 <div className="relative flex flex-col bg-black/90 rounded-[1.5rem] border-[10px] border-slate-950 overflow-hidden transition-transform duration-500 group-hover:[transform:rotateY(5deg)_rotateX(5deg)]">
                     <div className="relative z-10 flex flex-col p-4 md:p-6 bg-slate-950/40">
                         <div className="text-center mb-4 space-y-2">
@@ -351,8 +351,13 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
                         <div className="grid grid-cols-1 gap-2.5">
                             <Button 
                                 variant="outline" 
-                                className="w-full h-11 text-sm font-black rounded-2xl transition-all bg-white/5 border-white/10 border-b-4 border-slate-950" 
-                                onClick={() => router.push(`/draw/open?poolId=${pool.id}&draws=1`)}
+                                className="w-full h-11 text-sm font-black rounded-2xl transition-all bg-white/5 border-white/10 border-b-4 border-slate-950 active:translate-y-1 active:border-b-0" 
+                                onClick={() => {
+                                    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+                                        window.navigator.vibrate(50);
+                                    }
+                                    router.push(`/draw/open?poolId=${pool.id}&draws=1`);
+                                }}
                             >
                                 <span className="flex-1 text-center italic">
                                     {`單抽 ${pool.price?.toLocaleString()}`}
@@ -365,11 +370,16 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
                             </Button>
                             <Button 
                                 className={cn(
-                                    "w-full h-14 text-xl font-black rounded-2xl transition-all",
+                                    "w-full h-14 text-xl font-black rounded-2xl transition-all active:translate-y-1 active:border-b-0",
                                     !canDraw3 ? "bg-slate-800 text-slate-500 border-slate-700 opacity-50" : "bg-primary text-primary-foreground border-b-[6px] border-slate-950"
                                 )} 
                                 disabled={!canDraw3} 
-                                onClick={() => router.push(`/draw/open?poolId=${pool.id}&draws=${Math.min(3, pool.remainingPacks || 0)}`)}
+                                onClick={() => {
+                                    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+                                        window.navigator.vibrate([50, 50, 50]);
+                                    }
+                                    router.push(`/draw/open?poolId=${pool.id}&draws=${Math.min(3, pool.remainingPacks || 0)}`);
+                                }}
                             >
                                 <span className="flex-1 text-center italic">
                                     {!canDraw3 ? '今日額度不足三抽' : `${Math.min(3, pool.remainingPacks || 0)}連抽 ${((Math.min(3, pool.remainingPacks || 0) === 3 ? pool.price3Draws : (pool.price || 0) * (Math.min(3, pool.remainingPacks || 0))) || 0).toLocaleString()}`}

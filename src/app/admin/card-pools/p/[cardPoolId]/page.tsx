@@ -181,7 +181,7 @@ export default function CardPoolDetailPage() {
   const [startTimeValue, setStartTimeValue] = useState("00:00");
   
   const [newPointPrize, setNewPointPrize] = useState({ points: 100, quantity: 10, rarity: 'common' as Rarity });
-  const [salesStats, setSalesStats] = useState({ totalPoolValue: 0, totalDrawnValue: 0, loss: 0 });
+  const [salesStats, setSalesStats] = useState({ totalPoolValue: 0, totalDrawnValue: 0, loss: 0, totalRevenue: 0 });
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   // Fetch Card Pool details
@@ -206,7 +206,18 @@ export default function CardPoolDetailPage() {
       try {
         console.log('DEBUG: Current user:', auth ? (auth.currentUser?.uid || 'no user') : 'no auth object', auth?.currentUser?.email);
         console.log('DEBUG: Firestore instance:', firestore);
-        console.log('DEBUG: Transactions collection path:', collection(firestore, 'transactions').path);
+        
+        // Test access to each collection individually
+        const collectionsToTest = ['transactions', 'allCards', 'drawnCardLogs'];
+        for (const colName of collectionsToTest) {
+            try {
+                await getDocs(collection(firestore, colName));
+                console.log(`DEBUG: Successfully accessed collection: ${colName}`);
+            } catch (colErr) {
+                console.error(`DEBUG: Failed to access collection: ${colName}`, colErr);
+            }
+        }
+
         console.log('DEBUG: Querying transactions...');
         const txQuery = query(collection(firestore, 'transactions'), where('targetId', '==', cardPoolId));
         const txSnapshot = await getDocs(txQuery);
@@ -242,8 +253,10 @@ export default function CardPoolDetailPage() {
             totalPoolValue += cardMap.get(cardPool.lastPrizeCardId) || 0;
         }
         
+        console.log('DEBUG: Querying drawnCardLogs...');
         const drawnLogsQuery = query(collection(firestore, 'drawnCardLogs'), where('poolId', '==', cardPoolId));
         const drawnLogsSnapshot = await getDocs(drawnLogsQuery);
+        console.log('DEBUG: drawnCardLogs queried successfully.');
         
         let totalDrawnValue = 0;
         drawnLogsSnapshot.forEach(doc => {
@@ -254,7 +267,8 @@ export default function CardPoolDetailPage() {
         setSalesStats({
             totalPoolValue,
             totalDrawnValue: totalDrawnValue,
-            loss: totalSales - totalDrawnValue
+            loss: totalSales - totalDrawnValue,
+            totalRevenue: totalSales
         });
       } catch (e) {
         console.error('DEBUG: fetchSalesStats error:', e);
@@ -1127,6 +1141,10 @@ export default function CardPoolDetailPage() {
                         {isLoadingStats ? <Skeleton className="h-32 w-full rounded-xl" /> : (
                             <>
                                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                    <span className="font-black text-slate-500 uppercase text-[10px] tracking-widest">目前卡池收入</span>
+                                    <span className="font-code font-black text-slate-900">{salesStats.totalRevenue.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
                                     <span className="font-black text-slate-500 uppercase text-[10px] tracking-widest">卡池總價值</span>
                                     <span className="font-code font-black text-slate-900">{salesStats.totalPoolValue.toLocaleString()}</span>
                                 </div>
@@ -1148,9 +1166,6 @@ export default function CardPoolDetailPage() {
 
       <Dialog open={isAddCardDialogOpen} onOpenChange={setIsAddCardDialogOpen}>
             <DialogContent className="light max-w-4xl h-[85vh] flex flex-col p-8 rounded-[2.5rem] bg-white text-slate-900">
-            <VisuallyHidden>
-                <DialogTitle>配置卡片</DialogTitle>
-            </VisuallyHidden>
             <DialogHeader className="mb-6">
                 <DialogTitle className="text-2xl font-black tracking-tight text-slate-900 italic uppercase"> {targetPrizeType === 'last' ? '設定最後賞指定資產' : `配置卡片至「${cardPool?.name}」`} </DialogTitle>
                 <DialogDescription className="font-bold text-slate-500">

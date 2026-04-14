@@ -197,9 +197,17 @@ export default function GroupBreakDetailPage() {
             }
             
             if(isTeamBreak) {
+                for (const teamId of selectedTeams) {
+                    const team = currentGroupBreak.teams?.find(t => t.teamId === teamId);
+                    if (team?.userId) throw new Error("部分隊伍已被選走，請重新整理後再試。");
+                }
                 const updatedTeams = currentGroupBreak.teams?.map(t => selectedTeams.has(t.teamId) ? { ...t, userId: user.uid } : t);
                 transaction.update(groupBreakRef, { teams: updatedTeams });
             } else {
+                for (const spotNumber of selectedSpots) {
+                    const spot = currentGroupBreak.spots?.find(s => s.spotNumber === spotNumber);
+                    if (spot?.userId) throw new Error("部分號碼已被選走，請重新整理後再試。");
+                }
                  const updatedSpots = currentGroupBreak.spots?.map(s => selectedSpots.has(s.spotNumber) ? { ...s, userId: user.uid } : s);
                  transaction.update(groupBreakRef, { spots: updatedSpots });
             }
