@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useMemo, ChangeEvent } from 'react';
+import { useState, useMemo, ChangeEvent, useEffect } from 'react';
 import { useCollection, useFirestore, useMemoFirebase, useAuth, useStorage } from '@/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy, getDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -39,7 +39,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Edit, Trash2, Image as ImageIcon, FileText, Loader2, Megaphone } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Image as ImageIcon, FileText, Loader2, Megaphone, Radio, MessageCircleCode, Users } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { SafeImage } from '@/components/safe-image';
@@ -47,6 +47,7 @@ import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import type { SystemConfig } from '@/types/system';
 
 interface NewsItem {
     id?: string;
@@ -80,6 +81,16 @@ export default function NewsAdminPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [systemConfig, setSystemConfig] = useState<SystemConfig | null>(null);
+  const systemConfigRef = useMemoFirebase(() => firestore ? doc(firestore, 'systemConfig', 'main') : null, [firestore]);
+
+  useEffect(() => {
+    if (!systemConfigRef) return;
+    getDoc(systemConfigRef).then(doc => {
+        if (doc.exists()) setSystemConfig(doc.data() as SystemConfig);
+    });
+  }, [systemConfigRef]);
 
   const newsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'news'), orderBy('createdAt', 'desc')) : null, [firestore]);
   const { data: newsItems, isLoading, forceRefetch } = useCollection<NewsItem>(newsQuery);
@@ -131,8 +142,57 @@ export default function NewsAdminPage() {
     }
   };
 
+  const updateSystemConfig = async (data: Partial<SystemConfig>) => {
+    if (!systemConfigRef) return;
+    await updateDoc(systemConfigRef, data);
+    setSystemConfig(prev => prev ? {...prev, ...data} : null);
+  };
+
   return (
     <div className="space-y-8 text-slate-900">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <Card className="border-slate-200 bg-white shadow-sm rounded-2xl">
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Radio className="h-5 w-5 text-slate-400"/> 直播球設定</CardTitle></CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="live-toggle" className="text-sm font-bold">啟用直播球</Label>
+                        <Switch id="live-toggle" checked={systemConfig?.isLiveEnabled || false} onCheckedChange={(v) => updateSystemConfig({ isLiveEnabled: v })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="live-url" className="text-xs font-bold text-slate-500">直播連結 (YouTube URL)</Label>
+                        <Input id="live-url" value={systemConfig?.liveYoutubeUrl || ''} onChange={e => updateSystemConfig({ liveYoutubeUrl: e.target.value })} className="h-12 border-slate-200 rounded-xl font-bold bg-white text-slate-900" placeholder="https://youtube.com/..." />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 bg-white shadow-sm rounded-2xl">
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><MessageCircleCode className="h-5 w-5 text-slate-400"/> 客服球設定</CardTitle></CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="support-toggle" className="text-sm font-bold">啟用客服球</Label>
+                        <Switch id="support-toggle" checked={systemConfig?.isSupportEnabled || false} onCheckedChange={(v) => updateSystemConfig({ isSupportEnabled: v })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="support-url" className="text-xs font-bold text-slate-500">客服連結 (Line URL)</Label>
+                        <Input id="support-url" value={systemConfig?.supportLineUrl || ''} onChange={e => updateSystemConfig({ supportLineUrl: e.target.value })} className="h-12 border-slate-200 rounded-xl font-bold bg-white text-slate-900" placeholder="https://line.me/..." />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 bg-white shadow-sm rounded-2xl">
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Users className="h-5 w-5 text-slate-400"/> 社群球設定</CardTitle></CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="community-toggle" className="text-sm font-bold">啟用社群球</Label>
+                        <Switch id="community-toggle" checked={systemConfig?.isCommunityEnabled || false} onCheckedChange={(v) => updateSystemConfig({ isCommunityEnabled: v })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="community-url" className="text-xs font-bold text-slate-500">社群連結 (URL)</Label>
+                        <Input id="community-url" value={systemConfig?.communityUrl || ''} onChange={e => updateSystemConfig({ communityUrl: e.target.value })} className="h-12 border-slate-200 rounded-xl font-bold bg-white text-slate-900" placeholder="https://..." />
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
        <div className="flex justify-between items-center">
             <div>
                 <h1 className="text-3xl font-black tracking-tight">消息發布管理</h1>

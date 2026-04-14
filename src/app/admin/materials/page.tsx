@@ -94,7 +94,7 @@ export default function MaterialsAdminPage() {
                     <CardHeader><CardTitle className="text-lg flex items-center gap-2"><ImageIcon className="h-5 w-5 text-slate-400"/> 品牌標誌 (Logo)</CardTitle></CardHeader>
                     <CardContent className="space-y-6">
                         <div className="h-24 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center p-4 relative overflow-hidden">
-                            {systemConfig?.logoUrl ? <SafeImage src={systemConfig.logoUrl} alt="l" className="h-10 object-contain" /> : <span className="text-xs text-slate-300">目前無標誌</span>}
+                            {systemConfig?.logoUrl ? <SafeImage src={systemConfig.logoUrl} alt="l" className="h-10 object-contain" width={100} height={40} /> : <span className="text-xs text-slate-300">目前無標誌</span>}
                         </div>
                         <Input type="file" accept="image/*" onChange={e => { if(e.target.files?.[0]) { setSelectedLogoFile(e.target.files[0]); setLogoPreviewUrl(URL.createObjectURL(e.target.files[0])); }}} className="text-xs h-12 border-slate-200" />
                         {logoPreviewUrl && <Button onClick={() => handleUpload('logo')} className="w-full h-12 bg-slate-900 text-white font-bold rounded-xl" disabled={logoUploadProgress !== null}>{logoUploadProgress !== null ? `上傳中 ${Math.round(logoUploadProgress)}%` : '確認更換標誌'}</Button>}

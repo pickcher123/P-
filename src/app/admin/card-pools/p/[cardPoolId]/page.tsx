@@ -1133,21 +1133,6 @@ export default function CardPoolDetailPage() {
                     </CardContent>
                 </UICard>
                 {poolDetails && <RarityProbabilities pool={poolDetails} allCards={allCards} />}
-                <UICard className="border-slate-200 bg-white shadow-sm overflow-hidden">
-                    <CardHeader className="bg-slate-50/50 border-b">
-                        <CardTitle className="flex items-center text-slate-900 font-black uppercase tracking-widest text-sm"><BarChart3 className="mr-3 text-primary h-4 w-4" />銷售統計對帳</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-4">
-                        {isLoadingStats ? <Skeleton className="h-32 w-full rounded-xl" /> : (
-                            <>
-                                <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                    <span className="font-black text-slate-500 uppercase text-[10px] tracking-widest">目前卡池收入</span>
-                                    <span className="font-code font-black text-slate-900">{salesStats.totalRevenue.toLocaleString()}</span>
-                                </div>
-                            </>
-                        )}
-                    </CardContent>
-                </UICard>
             </div>
         </div>
       </div>

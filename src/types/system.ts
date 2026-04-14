@@ -14,6 +14,10 @@ export interface SystemConfig {
     cardOpacity?: number; // 新增：遊戲卡片不透明度
     liveYoutubeUrl?: string;
     isLiveEnabled?: boolean;
+    supportLineUrl?: string;
+    isSupportEnabled?: boolean;
+    communityUrl?: string;
+    isCommunityEnabled?: boolean;
     featureFlags?: {
         isDrawEnabled?: boolean;
         isLuckyBagEnabled?: boolean;

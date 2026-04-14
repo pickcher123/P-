@@ -1,6 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
-  // Version: 2026-04-14-02-42
+  // Version: 2026-04-14-08-52
   match /databases/{database}/documents {
     match /{document=**} {
       allow read, write: if true;

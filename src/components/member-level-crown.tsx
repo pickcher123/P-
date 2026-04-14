@@ -121,8 +121,22 @@ export function MemberLevelCrown({ level, showLabel = false, className, size = '
                 sizeClasses[size],
                 isHighLevel && "ring-4 ring-offset-4 ring-offset-background ring-white/5"
             )}>
+                {/* Progressive Aura Effect */}
                 {isHighLevel && (
-                    <div className="absolute inset-0 rounded-full opacity-20 bg-gradient-to-tr from-transparent via-white to-transparent animate-spin-slow" />
+                    <div className={cn(
+                        "absolute -inset-2 rounded-full border-2 border-dashed animate-spin-slow",
+                        levelInfo.color,
+                        "opacity-30"
+                    )} />
+                )}
+
+                {/* Dynamic Starburst Effect */}
+                {isHighLevel && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className={cn("absolute w-full h-full rounded-full animate-ping opacity-20", levelInfo.bg)} />
+                        <Sparkles className={cn("absolute -top-2 -right-2 w-1/3 h-1/3 animate-pulse", levelInfo.color)} />
+                        <Sparkles className={cn("absolute -bottom-2 -left-2 w-1/4 h-1/4 animate-pulse delay-700", levelInfo.color)} />
+                    </div>
                 )}
 
                 <IconComponent className={cn(
@@ -131,13 +145,6 @@ export function MemberLevelCrown({ level, showLabel = false, className, size = '
                     levelInfo.animate,
                     iconSizeClasses[size]
                 )} />
-
-                {level === 'P+卡神' && (
-                    <>
-                        <Sparkles className="absolute -top-1 -right-1 w-1/3 h-1/3 text-primary animate-pulse" />
-                        <Sparkles className="absolute -bottom-1 -left-1 w-1/4 h-1/4 text-primary animate-pulse delay-700" />
-                    </>
-                )}
             </div>
 
             {showLabel && (
