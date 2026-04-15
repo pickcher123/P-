@@ -226,58 +226,55 @@ export function LuckBagDetailView({ luckBag }: { luckBag: LuckBagWithCount }) {
                         <div className="space-y-4 md:space-y-6 flex-1 flex flex-col justify-between">
                             <div className="grid grid-cols-3 gap-3 md:gap-4">
                                 {luckBag.prizeCards.first && <PrizeDisplayCard card={luckBag.prizeCards.first} levelText="頭獎" onPreview={setPreviewCard} />}
-                                {luckBag.prizeCards.second && <PrizeDisplayCard card={luckBag.prizeCards.second} levelText="貳獎" onPreview={setPreviewCard} />}
-                                {luckBag.prizeCards.third && <PrizeDisplayCard card={luckBag.prizeCards.third} levelText="叁獎" onPreview={setPreviewCard} />}
+                                {luckBag.prizeCards.second && <PrizeDisplayCard card={luckBag.prizeCards.second} levelText="2 獎" onPreview={setPreviewCard} />}
+                                {luckBag.prizeCards.third && <PrizeDisplayCard card={luckBag.prizeCards.third} levelText="3 獎" onPreview={setPreviewCard} />}
+                                {[...luckBag.otherPrizesList, ...luckBag.otherPointsList.map(p => ({ ...p, isPoints: true }))].slice(0, 3).map((prize, index) => (
+                                    'isPoints' in prize ? (
+                                        <div key={prize.prizeId} className="flex flex-col items-center">
+                                            <div className="p-4 bg-white rounded-lg border h-full flex flex-col items-center justify-center w-full aspect-[4/5]">
+                                                <PPlusIcon className="w-12 h-12 text-accent" />
+                                            </div>
+                                            <div className="mt-2 text-center text-slate-900">
+                                                <p className="font-black text-[8px] uppercase text-slate-500 tracking-[0.1em]">{index + 4} 獎</p>
+                                                <p className="font-bold text-[10px] truncate text-slate-900">{prize.points} 點數</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <PrizeDisplayCard 
+                                            key={prize.prizeId} 
+                                            card={prize} 
+                                            levelText={`${index + 4} 獎`} 
+                                            onPreview={setPreviewCard} 
+                                        />
+                                    )
+                                ))}
                             </div>
                             
-                            {/* 其他獎項 (4, 5, 6 獎 + 更多) */}
+                            {/* 其他獎項按鈕 */}
                             {(luckBag.otherPrizesList && luckBag.otherPrizesList.length > 0 || luckBag.otherPointsList && luckBag.otherPointsList.length > 0) && (
-                                <div className="grid grid-cols-3 gap-3 md:gap-4 mt-4">
-                                    {/* 顯示前 3 個其他獎項 (總共 4, 5, 6 獎) */}
-                                    {[...luckBag.otherPrizesList, ...luckBag.otherPointsList.map(p => ({ ...p, isPoints: true }))].slice(0, 2).map((prize, index) => (
-                                        'isPoints' in prize ? (
-                                            <div key={prize.prizeId} className="p-4 bg-white rounded-lg border h-full flex flex-col items-center justify-center">
-                                                <PPlusIcon className="w-8 h-8 mb-2 text-accent" />
-                                                <p className="text-[10px] font-black text-slate-500">{['肆獎', '伍獎', '陸獎'][index]}</p>
-                                                <p className="font-bold text-sm text-slate-900">{prize.points} 點數</p>
-                                            </div>
-                                        ) : (
-                                            <PrizeDisplayCard 
-                                                key={prize.prizeId} 
-                                                card={prize} 
-                                                levelText={`${['肆獎', '伍獎', '陸獎'][index]}`} 
-                                                onPreview={setPreviewCard} 
-                                            />
-                                        )
-                                    ))}
-                                    
-                                    {/* 更多獎項按鈕 */}
-                                    {[...luckBag.otherPrizesList, ...luckBag.otherPointsList].length > 2 && (
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <div className="p-4 bg-slate-800 rounded-lg border h-full flex flex-col items-center justify-center cursor-pointer hover:bg-slate-900 transition-colors">
-                                                    <Trophy className="w-8 h-8 text-white" />
-                                                    <p className="text-[10px] font-black text-slate-300 mt-1">其他獎項</p>
-                                                </div>
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-md bg-slate-200 border-slate-400">
-                                                <DialogHeader>
-                                                    <DialogTitle>完整獎項列表</DialogTitle>
-                                                </DialogHeader>
-                                                <ScrollArea className="max-h-[60vh]">
-                                                    <div className="space-y-2">
-                                                        {[...luckBag.otherPrizesList, ...luckBag.otherPointsList.map(p => ({ ...p, isPoints: true }))].map((prize, index) => (
-                                                            <div key={prize.prizeId} className="p-3 bg-white rounded-lg border flex items-center justify-between">
-                                                                <span className="font-bold text-sm text-slate-500">{['肆獎', '伍獎', '陸獎', '柒獎', '捌獎', '玖獎'][index]}</span>
-                                                                <span className="font-bold text-sm text-slate-900">{'isPoints' in prize ? `${prize.points} 點數` : prize.name}</span>
-                                                            </div>
-                                                        ))}
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <div className="col-span-3 p-4 bg-slate-800 rounded-lg border flex items-center justify-center gap-3 cursor-pointer hover:bg-slate-900 transition-colors mt-2">
+                                            <Trophy className="w-6 h-6 text-white" />
+                                            <p className="text-sm font-black text-white">查看其他獎項</p>
+                                        </div>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-md bg-slate-200 border-slate-400">
+                                        <DialogHeader>
+                                            <DialogTitle>完整獎項列表</DialogTitle>
+                                        </DialogHeader>
+                                        <ScrollArea className="max-h-[60vh]">
+                                            <div className="space-y-2">
+                                                {[...luckBag.otherPrizesList, ...luckBag.otherPointsList.map(p => ({ ...p, isPoints: true }))].slice(3).map((prize, index) => (
+                                                    <div key={prize.prizeId} className="p-3 bg-white rounded-lg border flex items-center justify-between">
+                                                        <span className="font-bold text-sm text-slate-500">{index + 7} 獎</span>
+                                                        <span className="font-bold text-sm text-slate-900">{'isPoints' in prize ? `${prize.points} 點數` : prize.name}</span>
                                                     </div>
-                                                </ScrollArea>
-                                            </DialogContent>
-                                        </Dialog>
-                                    )}
-                                </div>
+                                                ))}
+                                            </div>
+                                        </ScrollArea>
+                                    </DialogContent>
+                                </Dialog>
                             )}
                             
                             <div className="p-3 md:p-4 bg-blue-50 rounded-xl border border-blue-100 flex items-start gap-2 md:gap-3">
