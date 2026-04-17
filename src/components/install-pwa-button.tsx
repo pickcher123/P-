@@ -46,7 +46,7 @@ export function InstallPWAButton() {
   return (
     <Button 
       onClick={handleInstallClick}
-      className="fixed bottom-20 right-4 z-[9999] rounded-full shadow-lg bg-primary text-primary-foreground font-black animate-bounce"
+      className="fixed bottom-20 left-4 z-[9999] rounded-full shadow-lg bg-primary text-primary-foreground font-black animate-bounce"
     >
       <Download className="mr-2 h-4 w-4" />
       安裝 APP
