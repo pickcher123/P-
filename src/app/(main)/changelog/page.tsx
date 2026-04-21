@@ -18,6 +18,16 @@ interface ChangeLogItem {
 
 const changelogData: ChangeLogItem[] = [
   {
+    version: "1.0 (公開測試)",
+    title: "公開測試版全面啟動：體驗優化",
+    type: "feature",
+    changes: [
+      "優化收藏頁：移除原有的自動放大效果，改為點擊後觸發，大幅提升瀏覽流暢度。",
+      "優化收藏頁卡片懸停體驗：非翻轉模式卡片新增「預覽放大鏡」懸停提示，直觀標示可檢視資產。",
+      "服務條款全面更新：修正條款細節，更新生效日期至最新版本。"
+    ]
+  },
+  {
     version: "7.4.5",
     title: "使用者體驗深度優化與介面整合",
     type: "ui",

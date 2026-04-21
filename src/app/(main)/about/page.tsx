@@ -194,7 +194,7 @@ export default function AboutPage() {
                                         <h4 className="font-bold text-white text-lg flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> 4. 點數儲值與使用</h4>
                                         <p>鑽石與 P 點僅限於本平台內部使用，不可轉讓予第三方或要求兌換現金。如發現惡意刷點、利用漏洞等行為，本平台有權永久封鎖該帳戶並回收違法所得資產。</p>
                                     </section>
-                                    <p className="pt-4 text-primary font-bold italic text-center">最後更新日期：2024年06月12日</p>
+                                    <p className="pt-4 text-primary font-bold italic text-center">最後更新日期：2026年04月21日</p>
                                 </div>
                             </ScrollArea>
                         </DialogContent>
