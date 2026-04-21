@@ -198,7 +198,7 @@ export default function CardPoolDetailPage() {
 
   useEffect(() => {
     async function fetchSalesStats() {
-      console.log('DEBUG: fetchSalesStats triggered', { firestore: !!firestore, cardPoolId, allCards: !!allCards });
+
       if (!firestore || !cardPoolId || !allCards) return;
       setIsLoadingStats(true);
       try {
@@ -216,18 +216,9 @@ export default function CardPoolDetailPage() {
             }
         }
 
-        console.log('DEBUG: Querying transactions...');
-        const txQuery = query(collection(firestore, 'transactions'), where('targetId', '==', cardPoolId));
-        const txSnapshot = await getDocs(txQuery);
-        console.log('DEBUG: Transactions queried successfully.');
+
         
-        let totalSales = 0;
-        txSnapshot.forEach(doc => {
-            const tx = doc.data();
-            if (tx.transactionType === 'Purchase' && tx.amount < 0) {
-                totalSales += Math.abs(tx.amount);
-            }
-        });
+
 
         // Calculate total pool value
         let totalPoolValue = 0;
@@ -275,6 +266,9 @@ export default function CardPoolDetailPage() {
       } finally {
         setIsLoadingStats(false);
       }
+      fetchSalesStats();
+    }
+  }, [firestore, cardPoolId, allCards, cardPool]);
   // Fetch all pools, betting items, and lucky bags to enforce the "assigned once" rule
   const { data: allCardPools } = useCollection<CardPool>(useMemoFirebase(() => firestore ? collection(firestore, 'cardPools') : null, [firestore]));
   const { data: bettingItems } = useCollection<any>(useMemoFirebase(() => firestore ? collection(firestore, 'betting-items') : null, [firestore]));
