@@ -401,7 +401,7 @@ export default function UsersAdminPage() {
       </div>
 
       <Card className="border-slate-200 shadow-lg overflow-hidden rounded-3xl bg-white">
-        <ScrollArea className="w-full">
+        <ScrollArea className="w-full whitespace-nowrap rounded-md border" orientation="horizontal">
             <Table className="min-w-[900px]">
             <TableHeader className="bg-slate-50">
                 <TableRow className="border-b-slate-200">

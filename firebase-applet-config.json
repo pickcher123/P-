@@ -1,10 +1,10 @@
 {
   "projectId": "studio-8439816843-ca6d5",
-  "appId": "1:931901750442:web:8794e86741677d55f8a4d3",
+  "appId": "1:931901750442:web:086f07a03a6cc0cbf8a4d3",
   "apiKey": "AIzaSyAQOsLg8IOb0yw6khH33o1TRUjGTN1s3xE",
   "authDomain": "studio-8439816843-ca6d5.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
   "storageBucket": "studio-8439816843-ca6d5.firebasestorage.app",
-  "measurementId": "",
   "messagingSenderId": "931901750442",
-  "firestoreDatabaseId": "(default)"
+  "measurementId": ""
 }

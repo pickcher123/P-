@@ -2,65 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // 檢查使用者是否已登入
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // 檢查是否為使用者本人
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    // 抽卡相關集合規則
-    match /cardPools/{poolId} {
-      allow read: if isSignedIn();
-      allow write: if false; // 禁止前端直接修改卡池配置
-    }
-
-    match /drawnCardLogs/{logId} {
-      allow create: if isSignedIn();
-      allow read: if isSignedIn();
-    }
-
-    match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId);
-      
-      match /userCards/{cardId} {
-        allow read: if isOwner(userId);
-        allow write: if false; // 由伺服器端交易處理
-      }
-      
-      match /poolStats/{poolId} {
-        allow read: if isOwner(userId);
-        allow write: if isOwner(userId);
-      }
-    }
-
-    match /transactions/{transactionId} {
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
-    }
-    
-    // 福袋相關集合規則
-    match /luckBags/{luckBagId} {
-        allow read: if isSignedIn();
-        match /luckBagPurchases/{purchaseId} {
-            allow read: if isSignedIn();
-            allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-        }
-    }
-    
-    // 定義 SalesStats 規則 (假设 salesStats 是獨立集合或在 users 內)
-    // 根據常見架構，假設它是全域或由管理員讀寫，這裡先設定為簽入使用者可讀。
-    match /salesStats/{statId} {
-        allow read: if isSignedIn();
-    }
-    
-    match /announcements/{announcementId} {
-        allow create: if isSignedIn();
-        allow read: if true;
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }

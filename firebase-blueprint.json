@@ -93,6 +93,10 @@
     "/shippingOrders/{orderId}": {
       "schema": "object",
       "description": "Shipping orders for physical items."
+    },
+    "/transaction-closure/{docId}": {
+      "schema": "object",
+      "description": "Transaction closure data."
     }
   }
 }

@@ -314,231 +314,34 @@ export default function OpenPackPage() {
             setIsChanging(false);
             
             try {
-                const result = await runTransaction(firestore, async (transaction) => {
-                    const poolRef = doc(firestore, 'cardPools', poolId);
-                    const userRef = doc(firestore, 'users', user.uid);
-                    
-                    const [pSnap, uSnap, sSnap] = await Promise.all([
-                        transaction.get(poolRef), 
-                        transaction.get(userRef),
-                        transaction.get(poolStatsRef)
-                    ]);
-                    
-                    if (!pSnap.exists() || !uSnap.exists()) throw new Error("同步失敗");
-                    
-                    const pData = pSnap.data() as CardPool;
-                    const uData = uSnap.data() as UserProfile;
-                    
-                    let currentStatsCount = 0;
-                    if (sSnap.exists() && sSnap.data().lastDrawDate === todayStr) {
-                        currentStatsCount = sSnap.data().count || 0;
-                    }
-                    if (pData.dailyLimit && pData.dailyLimit > 0 && currentStatsCount + count > pData.dailyLimit) {
-                        throw new Error("今日抽卡額度已達上限");
-                    }
-
-                    const actualCount = Math.min(count, pData.remainingPacks);
-                    if (actualCount <= 0) throw new Error("卡池已售罄");
-                    
-                    // 再次確認點數 (交易內)
-                    const finalCost = actualCount === 3 && pData.price3Draws ? pData.price3Draws : (pData.price || 0) * actualCount;
-                    if ((currencyField === 'bonusPoints' ? uData.bonusPoints : uData.points) < finalCost) {
-                        throw new Error("點數不足");
-                    }
-                    
-                    const cardIds = pData.cards?.map(c => c.cardId) || [];
-                    const cardDetailsMap = new Map<string, Card>();
-                    if (cardIds.length > 0) {
-                        const cardSnaps = await Promise.all(cardIds.map(id => transaction.get(doc(firestore, 'allCards', id))));
-                        cardSnaps.forEach(s => { if(s.exists()) cardDetailsMap.set(s.id, s.data() as Card); });
-                    }
-                    
-                    let weightedList: DrawnPrize[] = [];
-                    pData.pointPrizes?.forEach(p => {
-                        for (let i = 0; i < p.quantity; i++) {
-                            weightedList.push({ ...p, type: 'points' });
-                        }
-                    });
-                    pData.cards?.forEach(c => {
-                        const details = cardDetailsMap.get(c.cardId);
-                        const rarity = pData.cardRarities[c.cardId];
-                        if (details && rarity && c.quantity > 0 && !details.isSold) {
-                            for (let i = 0; i < c.quantity; i++) {
-                                weightedList.push({ ...details, id: c.cardId, rarity, type: 'card' });
-                            }
-                        }
-                    });
-                    
-                    const newBatch: DrawnPrize[] = [];
-                    const updatedCards = [...(pData.cards || [])];
-                    const updatedPoints = [...(pData.pointPrizes || [])];
-                    
-                    for (let i = 0; i < actualCount; i++) {
-                        if (weightedList.length === 0) break;
-                        const pickedIdx = Math.floor(Math.random() * weightedList.length);
-                        const picked = weightedList.splice(pickedIdx, 1)[0];
-                        
-                        if (picked.type === 'card') {
-                            const idx = updatedCards.findIndex(c => c.cardId === picked.id);
-                            updatedCards[idx].quantity -= 1;
-                            transaction.set(doc(collection(firestore, 'users', user.uid, 'userCards')), { 
-                                userId: user.uid, 
-                                cardId: picked.id, 
-                                rarity: picked.rarity, 
-                                category: picked.category, 
-                                isFoil: Math.random() < 0.05, 
-                                source: 'draw' 
-                            });
-                            transaction.update(doc(firestore, 'allCards', picked.id), { isSold: true });
-                            
-                             // Side Effect: Moved to outside
-                            
-                            if (picked.rarity === 'legendary') {
-                                // Side Effect: Moved to outside
-                            }
-                        } else if (picked.type === 'points') {
-                            const idx = updatedPoints.findIndex(p => p.prizeId === (picked as PointPrize).prizeId);
-                            updatedPoints[idx].quantity -= 1;
-                            
-                            if (picked.rarity === 'legendary') {
-                                // Side Effect: Moved to outside
-                            }
-                        }
-                        (picked as any).serialNumber = `${Math.floor(Math.random() * 9000) + 1000}`;
-                        newBatch.push(picked);
-                    }
-                    
-                    let lpPrize: DrawnPrize | null = null;
-                    const newRemaining = pData.remainingPacks - actualCount;
-                    if (pData.remainingPacks > 0 && newRemaining <= 0 && pData.lastPrizeCardId) {
-                        const lpSnap = await transaction.get(doc(firestore, 'allCards', pData.lastPrizeCardId));
-                        if (lpSnap.exists()) {
-                            const lpData = lpSnap.data() as Card;
-                            lpPrize = { ...lpData, id: lpSnap.id, rarity: 'legendary', type: 'last-prize', serialNumber: 'LP-1000' };
-                            transaction.set(doc(collection(firestore, 'users', user.uid, 'userCards')), { 
-                                userId: user.uid, 
-                                cardId: lpSnap.id, 
-                                rarity: 'legendary', 
-                                category: lpData.category, 
-                                isFoil: true, 
-                                source: 'last-prize' 
-                            });
-                            transaction.update(doc(firestore, 'allCards', lpSnap.id), { isSold: true });
-                            
-                            // Side Effect: Moved to outside
-                        }
-                    }
-                    
-                    const totalPPoints = newBatch.reduce((s, p) => p.type === 'points' ? s + (p as PointPrize).points : s, 0);
-                    let cashback = 0;
-                    if (pData.currency !== 'p-point' && systemConfig?.levelBenefits) {
-                        const benefit = systemConfig.levelBenefits.find(b => b.level === uData.userLevel);
-                        if (benefit?.cashbackRate) {
-                            cashback = Math.floor(finalCost * (benefit.cashbackRate / 100));
-                        }
-                    }
-                    
-                    transaction.update(userRef, { 
-                        [currencyField]: increment(-finalCost), 
-                        bonusPoints: increment(totalPPoints + cashback), 
-                        totalSpent: pData.currency !== 'p-point' ? increment(finalCost) : increment(0) 
-                    });
-                    
-                    transaction.set(poolStatsRef, {
-                        count: currentStatsCount + actualCount,
-                        lastDrawDate: todayStr,
-                        updatedAt: serverTimestamp()
-                    }, { merge: true });
-    
-                    transaction.update(poolRef, { 
-                        remainingPacks: newRemaining, 
-                        cards: updatedCards, 
-                        pointPrizes: updatedPoints, 
-                        lockedBy: user.uid, 
-                        lockedAt: serverTimestamp() 
-                    });
-                    
-                    // Side Effect: Moved to outside
-                    
-                    return { newBatch, lpPrize, cashback, newRemaining, updatedCards, updatedPoints, uData };
+                // 發送請求至後端 API 執行抽卡
+                const response = await fetch('/api/draw', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: user.uid,
+                        poolId,
+                        count,
+                        currencyField,
+                        todayStr
+                    })
                 });
                 
-                if (result) {
-                    // Start of side-effects execution
-                    // Handle drawing logs and announcements
-                    result.newBatch.forEach(picked => {
-                         /* addDocumentNonBlocking(collection(firestore, 'drawnCardLogs'), {
-                            cardId: picked.type === 'card' || picked.type === 'last-prize' ? picked.id : (picked as PointPrize).prizeId,
-                            sellPrice: (picked.type === 'card' || picked.type === 'last-prize') ? ((picked as Card).sellPrice || 0) : 0,
-                            poolId: poolId,
-                            userId: user.uid,
-                            timestamp: serverTimestamp()
-                        }); */
-                        if (picked.rarity === 'legendary') {
-                             addDocumentNonBlocking(collection(firestore, 'announcements'), {
-                                username: result.uData.username,
-                                action: '抽中',
-                                prize: picked.type === 'card' ? picked.name : `${(picked as PointPrize).points} P+ 點數`,
-                                prizeImageUrl: picked.type === 'card' && (picked as Card).imageUrl ? (picked as Card).imageUrl : null,
-                                rarity: 'legendary',
-                                timestamp: serverTimestamp(),
-                                section: 'draw'
-                            });
-                        }
-                    });
-                    
-                    if (result.lpPrize) {
-                        /* addDocumentNonBlocking(collection(firestore, 'drawnCardLogs'), {
-                            cardId: result.lpPrize.id,
-                            sellPrice: (result.lpPrize as Card).sellPrice || 0,
-                            poolId: poolId,
-                            userId: user.uid,
-                            timestamp: serverTimestamp()
-                        }); */
-                        addDocumentNonBlocking(collection(firestore, 'announcements'), {
-                            username: result.uData.username,
-                            action: '獲得最後賞',
-                            prize: (result.lpPrize as Card).name,
-                            prizeImageUrl: (result.lpPrize as Card).imageUrl,
-                            rarity: 'legendary',
-                            timestamp: serverTimestamp(),
-                            section: 'draw'
-                        });
-                    }
-                    
-                    // Create Transaction Log
-                    setDocumentNonBlocking(doc(firestore, 'transactions', `${user.uid}_${Date.now()}`), {
-                        userId: user.uid,
-                        targetId: poolId,
-                        transactionType: 'Purchase',
-                        section: 'draw',
-                        currency: cardPool.currency || 'diamond',
-                        amount: -(result.newBatch.length === 3 && cardPool.price3Draws ? cardPool.price3Draws : (cardPool.price || 0) * result.newBatch.length),
-                        details: `Draw ${result.newBatch.length} from pool: ${cardPool.name}`,
-                        transactionDate: serverTimestamp()
-                    }, {});
-                    // End of side-effects
-                    const combined = [...result.newBatch];
-                    if (result.lpPrize) combined.push(result.lpPrize);
-                    
-                    setDrawnPrizes(combined);
-                    if (isFromSummary) {
-                        setSessionPrizes(combined);
-                    } else {
-                        setSessionPrizes(prev => [...prev, ...combined]);
-                    }
-                    setRevealedIndex(0);
-                    setCashbackPPoints(result.cashback);
-                    setCardPool(prev => prev ? ({ ...prev, remainingPacks: result.newRemaining, cards: result.updatedCards, pointPrizes: result.updatedPoints, lockedAt: { seconds: Math.floor(Date.now()/1000), nanoseconds: 0 } }) : null);
-                    setTimeout(() => setStep('ready-to-reveal'), 800);
-                }
-            } catch (e: any) { 
-                handleFirestoreError(e, OperationType.WRITE, 'transaction');
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+
+                console.log("DEBUG: Backend draw successful");
+                setStep('success'); 
+            } catch (error: any) {
+                console.error("DEBUG: 抽卡失敗:", error);
+                alert(`抽卡失敗: ${error.message}`);
+                setStep('idle');
+                throw error;
             }
-        } catch (e: any) { 
-            console.error(e);
-            setError(e.message); 
-            setStep('error'); 
+        } catch (error: any) {
+            console.error("DEBUG: 抽卡預檢查失敗:", error);
+            setStep('idle');
+            throw error;
         }
     }, [poolId, firestore, user, userProfile, systemConfig, cardPool, step, todayDrawCount, isLoadingStats, poolStatsRef, todayStr, toast]);
 
