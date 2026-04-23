@@ -120,103 +120,144 @@ function UserDetailsDialog({ user }: { user: UserProfile }) {
                     </div>
                 </div>
             </DialogTrigger>
-            <DialogContent className="light max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-none shadow-2xl text-slate-900">
-                <DialogHeader className="p-8 pb-4 bg-slate-50 border-b border-slate-100">
-                    <DialogTitle className="flex items-center gap-3 text-xl font-black text-slate-900">
+            <DialogContent className="light w-[95vw] md:max-w-4xl max-h-[95vh] flex flex-col p-0 overflow-hidden bg-white border-none shadow-2xl text-slate-900">
+                <DialogHeader className="p-4 md:p-8 pb-3 md:pb-4 bg-slate-50 border-b border-slate-100">
+                    <DialogTitle className="flex items-center gap-3 text-lg md:text-xl font-black text-slate-900">
                         <UserIcon className="text-slate-400 h-5 w-5" /> 會員詳細資料
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-hidden p-6">
+                <div className="flex-1 overflow-hidden">
                     <Tabs defaultValue="overview" className="h-full flex flex-col">
-                        <TabsList className="bg-slate-100 w-full grid grid-cols-3 rounded-lg p-1 h-11">
-                            <TabsTrigger value="overview" className="font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">帳戶概覽</TabsTrigger>
-                            <TabsTrigger value="transactions" className="font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">交易紀錄</TabsTrigger>
-                            <TabsTrigger value="shipping" className="font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">物流訂單</TabsTrigger>
-                        </TabsList>
+                        <div className="px-4 md:px-8 pt-4">
+                            <TabsList className="bg-slate-100 min-h-[44px] w-full grid grid-cols-3 rounded-lg p-1">
+                                <TabsTrigger value="overview" className="font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">帳戶概覽</TabsTrigger>
+                                <TabsTrigger value="transactions" className="font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">交易紀錄</TabsTrigger>
+                                <TabsTrigger value="shipping" className="font-bold data-[state=active]:bg-white data-[state=active]:shadow-sm">物流訂單</TabsTrigger>
+                            </TabsList>
+                        </div>
 
-                        <TabsContent value="overview" className="flex-grow mt-6 space-y-6 overflow-y-auto pr-2 custom-scrollbar text-slate-900">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <Card className="p-6 text-center rounded-2xl border-slate-200 bg-white shadow-sm">
-                                    <MemberLevelCrown level={user.userLevel} size="sm" showLabel />
-                                    <h3 className="mt-4 font-black text-lg text-slate-900">{user.username}</h3>
-                                    <Badge variant="outline" className="mt-2 text-[10px] uppercase font-black text-slate-600 border-slate-300">{user.role}</Badge>
-                                    <div className="mt-6 w-full space-y-3 text-xs">
-                                        <div className="flex justify-between border-b border-slate-100 pb-2">
-                                            <span className="text-slate-500 font-black uppercase text-[9px]">註冊日期</span>
-                                            <span className="font-code font-bold text-slate-700">{user.createdAt ? format((user.createdAt as any).toDate(), 'yyyy-MM-dd') : '-'}</span>
-                                        </div>
-                                        <div className="text-left"><p className="text-slate-500 text-[9px] font-black uppercase mb-1">UID</p><p className="font-mono text-[10px] font-bold break-all bg-slate-50 p-2 rounded border border-slate-100">{user.id}</p></div>
-                                    </div>
-                                </Card>
-
-                                <div className="md:col-span-2 space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm text-center">
-                                            <p className="text-[10px] font-black uppercase text-slate-500 mb-1">鑽石資產</p>
-                                            <p className="text-2xl font-black font-code flex items-center justify-center gap-2 text-cyan-700">
-                                                {user.points?.toLocaleString() || 0} <Gem className="w-5 h-5 text-cyan-600" />
-                                            </p>
-                                        </div>
-                                        <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm text-center">
-                                            <p className="text-[10px] font-black uppercase text-slate-500 mb-1">紅利 P 點</p>
-                                            <p className="text-2xl font-black font-code text-amber-700 flex items-center justify-center gap-2">
-                                                {user.bonusPoints?.toLocaleString() || 0} <PPlusIcon className="w-5 h-5" />
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <Card className="rounded-2xl border-slate-200 bg-white shadow-sm overflow-hidden">
-                                        <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
-                                            <MapPin className="w-4 h-4 text-slate-500" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">配送資訊</span>
-                                        </div>
-                                        <CardContent className="p-6 space-y-4 text-slate-900">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-1"><p className="text-slate-500 text-[9px] uppercase font-black">收件姓名</p><p className="font-black text-slate-900">{user.realName || '未填寫'}</p></div>
-                                                <div className="space-y-1"><p className="text-slate-500 text-[9px] uppercase font-black">聯絡電話</p><p className="font-bold font-code text-slate-900">{user.phone || '未填寫'}</p></div>
+                        <TabsContent value="overview" className="flex-1 mt-0 overflow-hidden focus-visible:outline-none">
+                            <ScrollArea className="h-full">
+                                <div className="p-4 md:p-8 space-y-6 text-slate-900">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <Card className="p-6 text-center rounded-2xl border-slate-200 bg-white shadow-sm flex flex-col items-center">
+                                            <MemberLevelCrown level={user.userLevel} size="sm" showLabel />
+                                            <h3 className="mt-4 font-black text-lg text-slate-900 break-all">{user.username}</h3>
+                                            <Badge variant="outline" className="mt-2 text-[10px] uppercase font-black text-slate-600 border-slate-300">{user.role}</Badge>
+                                            <div className="mt-6 w-full space-y-3 text-xs">
+                                                <div className="flex justify-between border-b border-slate-100 pb-2">
+                                                    <span className="text-slate-500 font-black uppercase text-[9px]">註冊日期</span>
+                                                    <span className="font-code font-bold text-slate-700">{user.createdAt ? format((user.createdAt as any).toDate(), 'yyyy-MM-dd') : '-'}</span>
+                                                </div>
+                                                <div className="text-left"><p className="text-slate-500 text-[9px] font-black uppercase mb-1">UID</p><p className="font-mono text-[10px] font-bold break-all bg-slate-50 p-2 rounded border border-slate-100">{user.id}</p></div>
                                             </div>
-                                            <div className="space-y-1 pt-4 border-t border-slate-100"><p className="text-slate-500 text-[9px] uppercase font-black">預設配送地址</p><p className="font-bold text-sm leading-relaxed text-slate-800">{user.address || '未設定'}</p></div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </div>
-                        </TabsContent>
+                                        </Card>
 
-                        <TabsContent value="transactions" className="flex-grow mt-6 overflow-hidden">
-                            <ScrollArea className="h-[450px] rounded-xl border border-slate-200 bg-white shadow-inner">
-                                <Table>
-                                    <TableHeader className="bg-slate-50 sticky top-0 z-10"><TableRow className="border-b-slate-200"><TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest pl-6">交易詳情</TableHead><TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest">變動</TableHead><TableHead className="text-right text-[10px] font-black text-slate-900 uppercase tracking-widest pr-6">日期時間</TableHead></TableRow></TableHeader>
-                                    <TableBody>
-                                        {isLoadingTx ? <TableRow><TableCell colSpan={3} className="text-center py-20"><Loader2 className="animate-spin mx-auto h-6 w-6 text-slate-300"/></TableCell></TableRow> : 
-                                        sortedTransactions.map(tx => (
-                                            <TableRow key={tx.id} className="hover:bg-slate-50 border-b-slate-100">
-                                                <TableCell className="text-xs font-bold text-slate-700 pl-6">{translateDetails(tx.details)}</TableCell>
-                                                <TableCell className={cn("font-code font-black text-sm", tx.amount > 0 ? "text-emerald-700" : "text-slate-900")}>{tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}{tx.currency === 'p-point' ? 'P' : '💎'}</TableCell>
-                                                <TableCell className="text-[10px] text-slate-500 font-bold text-right pr-6">{tx.transactionDate ? format((tx.transactionDate as any).toDate(), 'MM-dd HH:mm') : '-'}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                        <div className="md:col-span-2 space-y-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm text-center">
+                                                    <p className="text-[10px] font-black uppercase text-slate-500 mb-1">鑽石資產</p>
+                                                    <p className="text-2xl font-black font-code flex items-center justify-center gap-2 text-cyan-700">
+                                                        {user.points?.toLocaleString() || 0} <Gem className="w-5 h-5 text-cyan-600" />
+                                                    </p>
+                                                </div>
+                                                <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm text-center">
+                                                    <p className="text-[10px] font-black uppercase text-slate-500 mb-1">紅利 P 點</p>
+                                                    <p className="text-2xl font-black font-code text-amber-700 flex items-center justify-center gap-2">
+                                                        {user.bonusPoints?.toLocaleString() || 0} <PPlusIcon className="w-5 h-5" />
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <Card className="rounded-2xl border-slate-200 bg-white shadow-sm overflow-hidden text-slate-900">
+                                                <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2">
+                                                    <MapPin className="w-4 h-4 text-slate-500" />
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">配送資訊</span>
+                                                </div>
+                                                <CardContent className="p-6 space-y-4">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        <div className="space-y-1"><p className="text-slate-500 text-[9px] uppercase font-black">收件姓名</p><p className="font-black text-slate-900">{user.realName || '未填寫'}</p></div>
+                                                        <div className="space-y-1"><p className="text-slate-500 text-[9px] uppercase font-black">聯絡電話</p><p className="font-bold font-code text-slate-900">{user.phone || '未填寫'}</p></div>
+                                                    </div>
+                                                    <div className="space-y-1 pt-4 border-t border-slate-100 items-start flex flex-col"><p className="text-slate-500 text-[9px] uppercase font-black">預設配送地址</p><p className="font-bold text-sm leading-relaxed text-slate-800 text-left">{user.address || '未設定'}</p></div>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    </div>
+                                </div>
                             </ScrollArea>
                         </TabsContent>
 
-                        <TabsContent value="shipping" className="flex-grow mt-6 overflow-hidden">
-                            <ScrollArea className="h-[450px] rounded-xl border border-slate-200 bg-white shadow-inner">
-                                <Table>
-                                    <TableHeader className="bg-slate-50 sticky top-0 z-10"><TableRow className="border-b-slate-200"><TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest pl-6">日期</TableHead><TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest">數量</TableHead><TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest">狀態</TableHead><TableHead className="text-right text-[10px] font-black text-slate-900 uppercase tracking-widest pr-6">單號</TableHead></TableRow></TableHeader>
-                                    <TableBody>
-                                        {isLoadingShipping ? <TableRow><TableCell colSpan={4} className="text-center py-20"><Loader2 className="animate-spin mx-auto h-6 w-6 text-slate-300"/></TableCell></TableRow> :
-                                        rawOrders?.map(order => (
-                                            <TableRow key={order.id} className="hover:bg-slate-50 border-b-slate-100">
-                                                <TableCell className="text-[10px] font-code text-slate-600 font-bold pl-6">{order.createdAt ? format((order.createdAt as any).toDate(), 'MM-dd') : '-'}</TableCell>
-                                                <TableCell className="text-xs font-black text-slate-900">{order.cardCount} 張</TableCell>
-                                                <TableCell><Badge variant="secondary" className="text-[9px] h-5 uppercase font-black bg-slate-900 text-white border-none">{order.status}</Badge></TableCell>
-                                                <TableCell className="text-[10px] text-right font-mono text-cyan-700 font-black pr-6">{order.trackingNumber || '--'}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                        <TabsContent value="transactions" className="flex-1 mt-0 overflow-hidden focus-visible:outline-none">
+                            <ScrollArea className="h-full">
+                                <div className="p-4 md:p-8">
+                                    <div className="rounded-xl border border-slate-200 bg-white shadow-inner overflow-hidden">
+                                        <div className="overflow-x-auto">
+                                            <Table className="min-w-[500px]">
+                                                <TableHeader className="bg-slate-50 sticky top-0 z-10">
+                                                    <TableRow className="border-b-slate-200">
+                                                        <TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest pl-6">交易詳情</TableHead>
+                                                        <TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest">變動</TableHead>
+                                                        <TableHead className="text-right text-[10px] font-black text-slate-900 uppercase tracking-widest pr-6">日期時間</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {isLoadingTx ? (
+                                                        <TableRow><TableCell colSpan={3} className="text-center py-20"><Loader2 className="animate-spin mx-auto h-6 w-6 text-slate-300"/></TableCell></TableRow>
+                                                    ) : (
+                                                        sortedTransactions.map(tx => (
+                                                            <TableRow key={tx.id} className="hover:bg-slate-50 border-b-slate-100">
+                                                                <TableCell className="text-xs font-bold text-slate-700 pl-6">{translateDetails(tx.details)}</TableCell>
+                                                                <TableCell className={cn("font-code font-black text-sm", tx.amount > 0 ? "text-emerald-700" : "text-slate-900")}>
+                                                                    {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}{tx.currency === 'p-point' ? 'P' : '💎'}
+                                                                </TableCell>
+                                                                <TableCell className="text-[10px] text-slate-500 font-bold text-right pr-6">
+                                                                    {tx.transactionDate ? format((tx.transactionDate as any).toDate(), 'MM-dd HH:mm') : '-'}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ScrollArea>
+                        </TabsContent>
+
+                        <TabsContent value="shipping" className="flex-1 mt-0 overflow-hidden focus-visible:outline-none">
+                            <ScrollArea className="h-full">
+                                <div className="p-4 md:p-8">
+                                    <div className="rounded-xl border border-slate-200 bg-white shadow-inner overflow-hidden">
+                                        <div className="overflow-x-auto">
+                                            <Table className="min-w-[500px]">
+                                                <TableHeader className="bg-slate-50 sticky top-0 z-10">
+                                                    <TableRow className="border-b-slate-200">
+                                                        <TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest pl-6">日期</TableHead>
+                                                        <TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest">數量</TableHead>
+                                                        <TableHead className="text-[10px] font-black text-slate-900 uppercase tracking-widest">狀態</TableHead>
+                                                        <TableHead className="text-right text-[10px] font-black text-slate-900 uppercase tracking-widest pr-6">單號</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {isLoadingShipping ? (
+                                                        <TableRow><TableCell colSpan={4} className="text-center py-20"><Loader2 className="animate-spin mx-auto h-6 w-6 text-slate-300"/></TableCell></TableRow>
+                                                    ) : (
+                                                        rawOrders?.map(order => (
+                                                            <TableRow key={order.id} className="hover:bg-slate-50 border-b-slate-100">
+                                                                <TableCell className="text-[10px] font-code text-slate-600 font-bold pl-6">{order.createdAt ? format((order.createdAt as any).toDate(), 'MM-dd') : '-'}</TableCell>
+                                                                <TableCell className="text-xs font-black text-slate-900">{order.cardCount} 張</TableCell>
+                                                                <TableCell><Badge variant="secondary" className="text-[9px] h-5 uppercase font-black bg-slate-900 text-white border-none">{order.status}</Badge></TableCell>
+                                                                <TableCell className="text-[10px] text-right font-mono text-cyan-700 font-black pr-6">{order.trackingNumber || '--'}</TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                </div>
                             </ScrollArea>
                         </TabsContent>
                     </Tabs>
@@ -297,17 +338,25 @@ function ModifyPermissionsDialog({ user, onUpdate }: { user: UserProfile, onUpda
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild><Button variant="outline" size="sm" className="h-8 text-[10px] rounded-lg font-black bg-white border-slate-200 text-slate-700">模組授權</Button></DialogTrigger>
-            <DialogContent className="light max-w-2xl rounded-3xl bg-white shadow-2xl border-none text-slate-900">
-                <DialogHeader><DialogTitle className="text-xl font-black text-slate-900">管理模組授權 - {user.username}</DialogTitle></DialogHeader>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 py-6">
-                    {PERMISSION_ITEMS.map(item => (
-                        <div key={item.id} className="flex items-center space-x-2 p-3.5 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer group hover:border-slate-300 shadow-sm">
-                            <Checkbox id={`p-${item.id}`} checked={permissions.includes(item.id)} onCheckedChange={(c) => setPermissions(prev => c ? [...prev, item.id] : prev.filter(p => p !== item.id))} />
-                            <Label htmlFor={`p-${item.id}`} className="text-xs cursor-pointer font-black text-slate-700 group-hover:text-slate-900">{item.label}</Label>
+            <DialogContent className="light w-[95vw] md:max-w-2xl max-h-[90vh] rounded-3xl bg-white shadow-2xl border-none text-slate-900 p-0 flex flex-col overflow-hidden">
+                <DialogHeader className="p-6 border-b border-slate-50">
+                    <DialogTitle className="text-xl font-black text-slate-900">管理模組授權 - {user.username}</DialogTitle>
+                </DialogHeader>
+                <div className="flex-1 overflow-hidden">
+                    <ScrollArea className="h-full p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 py-4">
+                            {PERMISSION_ITEMS.map(item => (
+                                <div key={item.id} className="flex items-center space-x-2 p-3.5 border border-slate-100 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer group hover:border-slate-300 shadow-sm">
+                                    <Checkbox id={`p-${item.id}`} checked={permissions.includes(item.id)} onCheckedChange={(c) => setPermissions(prev => c ? [...prev, item.id] : prev.filter(p => p !== item.id))} />
+                                    <Label htmlFor={`p-${item.id}`} className="text-xs cursor-pointer font-bold text-slate-700 group-hover:text-slate-900">{item.label}</Label>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </ScrollArea>
                 </div>
-                <DialogFooter><Button onClick={handleConfirm} disabled={isProcessing} className="w-full rounded-2xl h-14 font-black bg-slate-900 text-white shadow-xl hover:bg-slate-800">{isProcessing ? <Loader2 className="animate-spin"/> : '儲存授權設定'}</Button></DialogFooter>
+                <DialogFooter className="p-6 border-t border-slate-50">
+                    <Button onClick={handleConfirm} disabled={isProcessing} className="w-full rounded-2xl h-14 font-black bg-slate-900 text-white shadow-xl hover:bg-slate-800">{isProcessing ? <Loader2 className="animate-spin"/> : '儲存授權設定'}</Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )
@@ -350,23 +399,31 @@ function ModifyPointsDialog({ user, onUpdate }: { user: UserProfile, onUpdate: (
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild><Button variant="outline" size="sm" className="h-8 text-[10px] rounded-lg font-black bg-white border-slate-200 text-slate-700">資產修正</Button></DialogTrigger>
-            <DialogContent className="light rounded-3xl bg-white shadow-2xl border-none p-10 text-slate-900">
-                <DialogHeader><DialogTitle className="text-xl font-black text-slate-900 text-center uppercase tracking-widest italic">資產手動修正協議</DialogTitle></DialogHeader>
-                <div className="py-6 space-y-8">
-                    <RadioGroup value={currency} onValueChange={(v: any) => setCurrency(v)} className="grid grid-cols-2 gap-4">
-                        <div className={cn("flex flex-col items-center gap-3 p-6 border-2 rounded-2xl cursor-pointer transition-all", currency === 'diamond' ? 'border-cyan-600 bg-cyan-50 shadow-lg' : 'border-slate-100 bg-slate-50 opacity-60')}>
-                            <RadioGroupItem value="diamond" id="dia" className="sr-only"/><Gem className="h-6 w-6 text-cyan-600"/><Label htmlFor="dia" className={cn("cursor-pointer font-black text-xs uppercase tracking-widest", currency === 'diamond' ? "text-slate-900" : "text-slate-400")}>鑽石資產 💎</Label>
+            <DialogContent className="light w-[95vw] md:max-w-md max-h-[90vh] rounded-3xl bg-white shadow-2xl border-none p-0 flex flex-col overflow-hidden text-slate-900">
+                <DialogHeader className="p-6 md:p-8 pb-3 md:pb-4 text-center border-b border-slate-50">
+                    <DialogTitle className="text-lg md:text-xl font-black text-slate-900 uppercase tracking-widest italic">資產手動修正協議</DialogTitle>
+                </DialogHeader>
+                <div className="flex-1 overflow-hidden">
+                    <ScrollArea className="h-full p-6 md:p-8">
+                        <div className="space-y-6 md:space-y-8">
+                            <RadioGroup value={currency} onValueChange={(v: any) => setCurrency(v)} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
+                                <div className={cn("flex flex-col items-center gap-3 p-4 md:p-6 border-2 rounded-2xl cursor-pointer transition-all", currency === 'diamond' ? 'border-cyan-600 bg-cyan-50 shadow-lg' : 'border-slate-100 bg-slate-50 opacity-60')}>
+                                    <RadioGroupItem value="diamond" id="dia" className="sr-only"/><Gem className="h-5 w-5 md:h-6 md:w-6 text-cyan-600"/><Label htmlFor="dia" className={cn("cursor-pointer font-black text-[10px] md:text-xs uppercase tracking-widest", currency === 'diamond' ? "text-slate-900" : "text-slate-400")}>鑽石資產 💎</Label>
+                                </div>
+                                <div className={cn("flex flex-col items-center gap-3 p-4 md:p-6 border-2 rounded-2xl cursor-pointer transition-all", currency === 'p-point' ? 'border-amber-600 bg-amber-50 shadow-lg' : 'border-slate-100 bg-slate-50 opacity-60')}>
+                                    <RadioGroupItem value="p-point" id="pt" className="sr-only"/><PPlusIcon className="h-5 w-5 md:h-6 md:w-6"/><Label htmlFor="pt" className={cn("cursor-pointer font-black text-[10px] md:text-xs uppercase tracking-widest", currency === 'p-point' ? "text-slate-900" : "text-slate-400")}>紅利 P 點</Label>
+                                </div>
+                            </RadioGroup>
+                            <div className="space-y-3">
+                                <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest block text-center">調整數量 (正數增加，負數扣除)</Label>
+                                <Input type="number" value={points || ''} onChange={(e) => setPoints(parseInt(e.target.value) || 0)} className="h-14 md:h-16 rounded-2xl text-2xl md:text-3xl font-black text-center border-slate-200 bg-white text-slate-900" placeholder="0" />
+                            </div>
                         </div>
-                        <div className={cn("flex flex-col items-center gap-3 p-6 border-2 rounded-2xl cursor-pointer transition-all", currency === 'p-point' ? 'border-amber-600 bg-amber-50 shadow-lg' : 'border-slate-100 bg-slate-50 opacity-60')}>
-                            <RadioGroupItem value="p-point" id="pt" className="sr-only"/><PPlusIcon className="h-6 w-6"/><Label htmlFor="pt" className={cn("cursor-pointer font-black text-xs uppercase tracking-widest", currency === 'p-point' ? "text-slate-900" : "text-slate-400")}>紅利 P 點</Label>
-                        </div>
-                    </RadioGroup>
-                    <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block text-center">調整數量 (正數增加，負數扣除)</Label>
-                        <Input type="number" value={points || ''} onChange={(e) => setPoints(parseInt(e.target.value) || 0)} className="h-16 rounded-2xl text-3xl font-black text-center border-slate-200 bg-white text-slate-900" placeholder="0" />
-                    </div>
+                    </ScrollArea>
                 </div>
-                <DialogFooter><Button onClick={handleConfirm} disabled={isProcessing} className="w-full rounded-2xl h-14 font-black bg-slate-900 text-white shadow-xl hover:bg-slate-800 transition-all text-lg">{isProcessing ? <Loader2 className="animate-spin h-5 w-5"/> : '確認執行資產變動'}</Button></DialogFooter>
+                <DialogFooter className="p-6 md:p-8 border-t border-slate-50">
+                    <Button onClick={handleConfirm} disabled={isProcessing} className="w-full rounded-2xl h-14 font-black bg-slate-900 text-white shadow-xl hover:bg-slate-800 transition-all text-lg">{isProcessing ? <Loader2 className="animate-spin h-5 w-5"/> : '確認執行資產變動'}</Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )
@@ -388,7 +445,7 @@ export default function UsersAdminPage() {
   }, [users, searchTerm]);
 
   return (
-    <div className="space-y-8 overflow-x-hidden">
+    <div className="space-y-8">
       <div className="flex flex-col xl:flex-row justify-between xl:items-center gap-6">
         <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">會員管理</h1>
@@ -401,8 +458,8 @@ export default function UsersAdminPage() {
       </div>
 
       <Card className="border-slate-200 shadow-lg overflow-hidden rounded-3xl bg-white">
-        <ScrollArea className="w-full whitespace-nowrap rounded-md border" orientation="horizontal">
-            <Table className="min-w-[900px]">
+        <div className="overflow-x-auto custom-scrollbar">
+            <Table className="min-w-[1000px]">
             <TableHeader className="bg-slate-50">
                 <TableRow className="border-b-slate-200">
                     <TableHead className="pl-8 text-[10px] font-black uppercase text-slate-900 tracking-widest py-5">會員資訊</TableHead>
@@ -442,7 +499,7 @@ export default function UsersAdminPage() {
                 )}
             </TableBody>
             </Table>
-        </ScrollArea>
+        </div>
       </Card>
     </div>
   );

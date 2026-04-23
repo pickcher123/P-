@@ -151,8 +151,9 @@ function ShippingOrdersTab({ userId }: { userId: string }) {
         <Card className="border-white/5 bg-card/30 backdrop-blur-xl rounded-[2rem] overflow-hidden">
             <CardHeader className="bg-muted/20 pb-4"><CardTitle className="text-lg flex items-center gap-2"><Truck className="h-5 w-5 text-primary"/> 出貨進度查詢</CardTitle></CardHeader>
             <CardContent className="p-0">
-                <Table>
-                    <TableHeader className="bg-muted/10"><TableRow className="border-white/5"><TableHead className="pl-6">張數</TableHead><TableHead>申請時間</TableHead><TableHead>狀態</TableHead><TableHead className="text-right pr-6">操作</TableHead></TableRow></TableHeader>
+                <div className="overflow-x-auto custom-scrollbar">
+                    <Table className="min-w-[500px] md:min-w-full">
+                        <TableHeader className="bg-muted/10"><TableRow className="border-white/5"><TableHead className="pl-6">張數</TableHead><TableHead>申請時間</TableHead><TableHead>狀態</TableHead><TableHead className="text-right pr-6">操作</TableHead></TableRow></TableHeader>
                     <TableBody>
                         {isLoading ? <TableRow><TableCell colSpan={4} className="p-6"><Skeleton className="h-10 w-full"/></TableCell></TableRow> : 
                         sortedOrders.map(order => (
@@ -168,6 +169,7 @@ function ShippingOrdersTab({ userId }: { userId: string }) {
                         )}
                     </TableBody>
                 </Table>
+                </div>
             </CardContent>
         </Card>
     );
@@ -183,8 +185,9 @@ function TransactionsTab({ userId }: { userId: string }) {
         <Card className="border-white/5 bg-card/30 backdrop-blur-xl rounded-[2rem] overflow-hidden">
             <CardHeader className="bg-muted/20 pb-4"><CardTitle className="text-lg flex items-center gap-2"><History className="h-5 w-5 text-primary"/> 最近 30 筆交易明細</CardTitle></CardHeader>
             <CardContent className="p-0">
-                <Table>
-                    <TableHeader className="bg-muted/10"><TableRow className="border-white/5"><TableHead className="pl-6">詳情內容</TableHead><TableHead>變動金額</TableHead><TableHead className="pr-6">交易時間</TableHead></TableRow></TableHeader>
+                <div className="overflow-x-auto custom-scrollbar">
+                    <Table className="min-w-[600px] md:min-w-full">
+                        <TableHeader className="bg-muted/10"><TableRow className="border-white/5"><TableHead className="pl-6">詳情內容</TableHead><TableHead>變動金額</TableHead><TableHead className="pr-6">交易時間</TableHead></TableRow></TableHeader>
                     <TableBody>
                         {isLoading ? <TableRow><TableCell colSpan={3} className="p-6"><Skeleton className="h-10 w-full"/></TableCell></TableRow> :
                         sorted.map(tx => (
@@ -204,6 +207,7 @@ function TransactionsTab({ userId }: { userId: string }) {
                         )}
                     </TableBody>
                 </Table>
+                </div>
             </CardContent>
         </Card>
     );
@@ -309,9 +313,9 @@ export default function ProfilePage() {
                     <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/20 via-card/80 to-background rounded-[2.5rem] shadow-2xl group">
                         <CardContent className="pt-10 flex flex-col items-center text-center relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform"><Crown className="w-24 h-24 text-primary" /></div>
-                            <div className="relative group/avatar">
-                                <div className="absolute -inset-4 bg-primary/20 rounded-full blur-xl opacity-0 group-hover/avatar:opacity-100 transition-opacity animate-pulse" />
-                                <MemberLevelCrown level={userProfile.userLevel} size="sm" />
+                            <div className="relative group/avatar mb-4">
+                                <div className="absolute -inset-12 bg-primary/20 rounded-full blur-3xl opacity-0 group-hover/avatar:opacity-100 transition-opacity animate-pulse" />
+                                <MemberLevelCrown level={userProfile.userLevel} size="lg" />
                             </div>
                             <h2 className="text-3xl font-black font-headline mt-6 tracking-tight text-white drop-shadow-md">{userProfile.username}</h2>
                             <div className="mt-2 flex items-center gap-2 bg-primary/10 px-4 py-1 rounded-full border border-primary/20">
