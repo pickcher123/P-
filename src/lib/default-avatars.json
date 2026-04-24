@@ -1,15 +1,15 @@
 {
   "avatars": [
-    { "id": "pg-1", "position": "PG", "label": "控球後衛 - 迅捷", "imageUrl": "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball player dribbling" },
-    { "id": "pg-2", "position": "PG", "label": "控球後衛 - 幻影", "imageUrl": "https://images.unsplash.com/photo-1519861531473-92003ff238c7?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball handle move" },
-    { "id": "sg-1", "position": "SG", "label": "得分後衛 - 精準", "imageUrl": "https://images.unsplash.com/photo-1515523110800-9415d13b84a8?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball shooting pose" },
-    { "id": "sg-2", "position": "SG", "label": "得分後衛 - 烈焰", "imageUrl": "https://images.unsplash.com/photo-1504450758481-7338ef752242?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball player silhouette" },
-    { "id": "sf-1", "position": "SF", "label": "小前鋒 - 全能", "imageUrl": "https://images.unsplash.com/photo-1544919982-b61976f0ba43?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball dunk action" },
-    { "id": "sf-2", "position": "SF", "label": "小前鋒 - 暗影", "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "athlete jumping" },
-    { "id": "pf-1", "position": "PF", "label": "大前鋒 - 鋼鐵", "imageUrl": "https://images.unsplash.com/photo-1511886929837-354d827aae26?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball player defense" },
-    { "id": "pf-2", "position": "PF", "label": "大前鋒 - 暴力", "imageUrl": "https://images.unsplash.com/photo-1505666287802-931dc83948e9?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball rim attack" },
-    { "id": "c-1", "position": "C", "label": "中鋒 - 霸主", "imageUrl": "https://images.unsplash.com/photo-1563506210814-2f07f7046d1f?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "tall basketball athlete" },
-    { "id": "c-2", "position": "C", "label": "中鋒 - 守護", "imageUrl": "https://images.unsplash.com/photo-1584466977773-e625c37cdd50?q=80&w=400&h=400&auto=format&fit=crop", "imageHint": "basketball block" }
+    { "id": "pg-1", "position": "PG", "label": "控球後衛 - 迅捷", "imageUrl": "https://picsum.photos/seed/pg-1/400/400", "imageHint": "basketball player dribbling" },
+    { "id": "pg-2", "position": "PG", "label": "控球後衛 - 幻影", "imageUrl": "https://picsum.photos/seed/pg-2/400/400", "imageHint": "basketball handle move" },
+    { "id": "sg-1", "position": "SG", "label": "得分後衛 - 精準", "imageUrl": "https://picsum.photos/seed/sg-1/400/400", "imageHint": "basketball shooting pose" },
+    { "id": "sg-2", "position": "SG", "label": "得分後衛 - 烈焰", "imageUrl": "https://picsum.photos/seed/sg-2/400/400", "imageHint": "basketball player silhouette" },
+    { "id": "sf-1", "position": "SF", "label": "小前鋒 - 全能", "imageUrl": "https://picsum.photos/seed/sf-1/400/400", "imageHint": "basketball dunk action" },
+    { "id": "sf-2", "position": "SF", "label": "小前鋒 - 暗影", "imageUrl": "https://picsum.photos/seed/sf-2/400/400", "imageHint": "athlete jumping" },
+    { "id": "pf-1", "position": "PF", "label": "大前鋒 - 鋼鐵", "imageUrl": "https://picsum.photos/seed/pf-1/400/400", "imageHint": "basketball player defense" },
+    { "id": "pf-2", "position": "PF", "label": "大前鋒 - 暴力", "imageUrl": "https://picsum.photos/seed/pf-2/400/400", "imageHint": "basketball rim attack" },
+    { "id": "c-1", "position": "C", "label": "中鋒 - 霸主", "imageUrl": "https://picsum.photos/seed/c-1/400/400", "imageHint": "tall basketball athlete" },
+    { "id": "c-2", "position": "C", "label": "中鋒 - 守護", "imageUrl": "https://picsum.photos/seed/c-2/400/400", "imageHint": "basketball block" }
   ],
   "aiPresets": [
     { "position": "PG", "label": "迅捷 (風)", "prompt": "A futuristic, cyber-enhanced point guard basketball player, wearing glowing cyan jersey, lightning speed visual effects, athletic pose, holographic basketball, dark background with blue lens flare." },
