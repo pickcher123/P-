@@ -5,6 +5,7 @@ import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Megaphone, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 interface NewsItem {
     id: string;
@@ -14,7 +15,11 @@ interface NewsItem {
     isMarquee?: boolean;
 }
 
-export function NewsMarquee() {
+interface NewsMarqueeProps {
+    isDrawing?: boolean;
+}
+
+export function NewsMarquee({ isDrawing }: NewsMarqueeProps) {
     const firestore = useFirestore();
 
     // 抓取最近的消息，前端過濾
@@ -40,7 +45,10 @@ export function NewsMarquee() {
     }
 
     return (
-        <div className="bg-background/60 backdrop-blur-md border border-white/10 h-8 md:h-9 overflow-hidden relative flex items-center justify-between mx-4 my-1.5 rounded-full md:mx-0 md:my-0 md:rounded-none shadow-xl shadow-black/40 max-w-[92vw] md:max-w-none">
+        <div className={cn(
+            "backdrop-blur-md border-b border-white/10 h-8 md:h-9 overflow-hidden relative flex items-center justify-between shadow-xl shadow-black/40 transition-colors duration-500",
+            isDrawing ? "bg-black/80" : "bg-background/60"
+        )}>
             <div className="flex items-center flex-1 overflow-hidden">
                 {/* 品牌標籤 - 移至左側，增加左邊距以對齊 Logo */}
                 <div className="px-2 md:px-5 z-20 flex items-center ml-1 md:ml-4">

@@ -72,10 +72,18 @@ export async function performDrawAction(userId: string, poolId: string, count: n
         cards: remainingCards
       });
 
-      return drawn;
+      return { drawn, userData: userSnap.data()! };
     });
 
-    return { success: true, data: result };
+    // 推送中獎通知
+    if (result.drawn.some(card => card.rarity === 'rare' || card.rarity === 'super-rare')) {
+      const { pushLineMessage } = await import('@/lib/line');
+      if (result.userData.lineUserId) {
+        await pushLineMessage(result.userData.lineUserId, `恭喜抽中大獎！\n獎項：${result.drawn.filter(c => c.rarity === 'rare' || c.rarity === 'super-rare').map(c => c.name).join(', ')}`);
+      }
+    }
+
+    return { success: true, data: result.drawn };
   } catch (error: any) {
     console.error('Server Action Error:', error);
     return { success: false, error: error.message };

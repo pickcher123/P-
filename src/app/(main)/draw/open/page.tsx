@@ -536,20 +536,10 @@ export default function OpenPackPage() {
                             <h2 className="text-xs md:text-base font-headline font-black text-white uppercase truncate px-2">{cardPool.name}</h2>
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-white/5 rounded-xl border border-white/10"><span className="text-[7px] text-muted-foreground font-black block uppercase">本次抽數</span><span className="text-base font-black text-white">{initialDrawCount} 包</span></div>
-                                <div className="p-2 bg-primary/10 rounded-xl border border-primary/20"><span className="text-[7px] text-primary font-black block uppercase">預計花費</span><div className="text-base font-black text-white flex items-center justify-center gap-1">{cost.toLocaleString()} {cardPool.currency === 'p-point' ? <PPlusIcon className="h-3 w-3" /> : <Gem className="h-3 w-3 text-primary"/>}</div></div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 {cardPool.minLevel && cardPool.minLevel !== '新手收藏家' && (
                                     <div className={cn("p-2 rounded-xl border flex items-center justify-center gap-2", isLevelMet ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-rose-500/10 border-rose-500/30 text-rose-500")}><ShieldCheck className="w-3 h-3" /><span className="text-[9px] font-black uppercase">等級限制: {cardPool.minLevel}</span></div>
-                                )}
-                                {cardPool.dailyLimit && cardPool.dailyLimit > 0 && (
-                                    <div className={cn(
-                                        "p-2 rounded-xl border flex items-center justify-center gap-2 transition-all duration-500", 
-                                        isLimitReachedForInitial ? "bg-rose-600 border-rose-400 text-white" : "bg-amber-500/10 border-amber-500/30 text-amber-500"
-                                    )}>
-                                        <Ban className="w-3 h-3" />
-                                        <span className="text-[9px] font-black uppercase">每日限購: {cardPool.dailyLimit} 包 (今日已抽: {todayDrawCount})</span>
-                                    </div>
                                 )}
                             </div>
                         </div>

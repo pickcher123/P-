@@ -22,12 +22,13 @@ export default function MainLayout({
   const { data: systemConfig } = useDoc<SystemConfig>(systemConfigRef);
   
   const isMarqueeVisible = systemConfig?.featureFlags?.isMarqueeEnabled !== false;
+  const isDrawing = pathname.startsWith('/draw');
   
   return (
     <div className="relative flex min-h-screen flex-col">
       <AnimatedBackground backgroundUrl={systemConfig?.backgroundUrl} backgroundOpacity={systemConfig?.backgroundOpacity} />
       <Header systemConfig={systemConfig} />
-      {isMarqueeVisible && <NewsMarquee />}
+      {isMarqueeVisible && <NewsMarquee isDrawing={isDrawing} />}
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
       <InstallPWAButton />
       <FloatingLineButton systemConfig={systemConfig} />

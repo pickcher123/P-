@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client, WebhookEvent, validateSignature } from '@line/bot-sdk';
+import { messagingApi, WebhookEvent, validateSignature } from '@line/bot-sdk';
 import { adminDb } from '@/lib/firebase-admin';
 
 const channelSecret = process.env.LINE_CHANNEL_SECRET || '';
 const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN || '';
 
-const client = new Client({
+const client = new messagingApi.MessagingApiClient({
   channelAccessToken,
-  channelSecret,
 });
 
 export async function POST(req: NextRequest) {
@@ -44,8 +43,13 @@ async function handlePoolQuery(event: WebhookEvent) {
     message += `- ${data.name || '未知卡池'}: 剩餘 ${data.remainingPacks || 0} 包\n`;
   });
 
-  await client.replyMessage(event.replyToken, {
-    type: 'text',
-    text: message,
+  await client.replyMessage({
+    replyToken: event.replyToken,
+    messages: [
+      {
+        type: 'text',
+        text: message,
+      },
+    ],
   });
 }

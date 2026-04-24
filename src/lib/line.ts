@@ -1,23 +1,28 @@
-import { Client, WebhookEvent, MessageAPIResponseBase } from '@line/bot-sdk';
+import { messagingApi } from '@line/bot-sdk';
 
-const config = {
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || '',
-  channelSecret: process.env.LINE_CHANNEL_SECRET || '',
-};
+const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN || '';
 
-let lineClient: Client | null = null;
+const client = new messagingApi.MessagingApiClient({
+  channelAccessToken,
+});
 
-export function getLineClient(): Client {
-  if (!lineClient) {
-    if (!config.channelAccessToken || !config.channelSecret) {
-      throw new Error('LINE_CHANNEL_ACCESS_TOKEN and LINE_CHANNEL_SECRET environment variables are required');
-    }
-    lineClient = new Client(config);
+export async function pushLineMessage(userId: string, message: string) {
+  if (!channelAccessToken) {
+    console.warn('LINE_CHANNEL_ACCESS_TOKEN is not set');
+    return;
   }
-  return lineClient;
-}
-
-export async function sendLineMessage(userId: string, message: string): Promise<MessageAPIResponseBase> {
-  const client = getLineClient();
-  return client.pushMessage(userId, { type: 'text', text: message });
+  
+  try {
+    await client.pushMessage({
+      to: userId,
+      messages: [
+        {
+          type: 'text',
+          text: message,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error('Error pushing LINE message:', error);
+  }
 }
