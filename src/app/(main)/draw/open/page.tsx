@@ -555,6 +555,7 @@ export default function OpenPackPage() {
                             <h2 className="text-xs md:text-base font-headline font-black text-white uppercase truncate px-2">{cardPool.name}</h2>
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="p-2 bg-white/5 rounded-xl border border-white/10"><span className="text-[7px] text-muted-foreground font-black block uppercase">本次抽數</span><span className="text-base font-black text-white">{initialDrawCount} 包</span></div>
+                                <div className="p-2 bg-white/5 rounded-xl border border-white/10"><span className="text-[7px] text-muted-foreground font-black block uppercase">花費金額</span><div className="flex items-center justify-center gap-1 text-base font-black text-white">{cardPool.currency === 'p-point' ? <><PPlusIcon className="w-3 h-3 text-sky-400" />{cost}</> : <><Diamond className="w-3 h-3 text-sky-400" />{cost}</>}</div></div>
                             </div>
                             <div className="flex flex-col gap-2">
                                 {cardPool.minLevel && cardPool.minLevel !== '新手收藏家' && (
@@ -569,6 +570,7 @@ export default function OpenPackPage() {
                                     <li>● 本站商品屬機率型抽選及數位內容，購買後即視為參與活動。</li>
                                     <li>● 本服務經提供即完成，依《消保法》不適用七日鑑賞期。</li>
                                     <li>● 在進行購買前,您需要完全同意本站的購買規則。</li>
+                                    <li>● 啟動開獎之後,代表您完全同意本站的購買規則。</li>
                                 </ul>
                             </div>
                         </div>
@@ -608,13 +610,7 @@ export default function OpenPackPage() {
     const canDraw3 = !isLoadingStats && (!cardPool?.dailyLimit || cardPool.dailyLimit === 0 || (todayDrawCount + 3 <= cardPool.dailyLimit));
 
     return (
-        <div className="flex flex-col items-center h-screen p-2 pt-2 relative overflow-hidden select-none touch-none justify-start md:justify-center"
-             style={{
-                 backgroundImage: 'url("/draw-background.png.png")',
-                 backgroundSize: 'cover',
-                 backgroundPosition: 'center'
-             }}
-        >
+        <div className="flex flex-col items-center h-screen p-2 pt-2 relative overflow-hidden select-none touch-none justify-start md:justify-center" style={{ backgroundImage: 'url("/draw-background.png.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <CelebrationVFX type={landingVFX !== 'none' ? landingVFX : showCelebration} />
             <Button variant="ghost" onClick={() => router.back()} className="absolute top-2 left-2 font-bold text-white/40 z-50 text-xs"><ArrowLeft className="mr-1 h-3 w-3" /> 返回</Button>
@@ -823,8 +819,7 @@ export default function OpenPackPage() {
                                 <span>VIP回饋: +{cashbackPPoints}</span>
                                 <PPlusIcon className="w-3 h-3" />
                             </div>
-                        )
-                        }
+                        )}
                         
                         {step === 'revealing' && revealedIndex < drawnPrizes.length - 1 ? (
                             <Button 
@@ -834,59 +829,70 @@ export default function OpenPackPage() {
                                 {drawnPrizes[revealedIndex+1]?.type === 'last-prize' ? '🎉 揭曉最後賞限定！' : `揭曉下一項 (${revealedIndex+1}/${drawnPrizes.length})`}
                             </Button>
                         ) : (step === 'done' || (step === 'revealing' && revealedIndex === drawnPrizes.length - 1)) && (
-                            <div className="grid grid-cols-2 gap-2">
-                                {isLimitReachedForSingle ? (
-                                    <Button 
-                                        disabled 
-                                        className="col-span-2 h-9 text-[10px] font-black rounded-xl bg-slate-800 text-slate-500 border border-slate-700 opacity-50 italic"
-                                    >
-                                        今日次數已用完
-                                    </Button>
-                                ) : (
-                                    <>
-                                        <Button 
-                                            className={cn(
-                                                "h-9 text-[10px] font-black border transition-all shadow-lg rounded-xl",
-                                                isLoadingStats ? "bg-slate-800 text-slate-500 border-slate-700 opacity-50" : "bg-white/5 text-white border-white/10 hover:bg-white/10"
-                                            )}
-                                            onClick={() => performDraw(1)} 
-                                            disabled={isLoadingStats || (cardPool?.remainingPacks ?? 0) < 1}
-                                        >
-                                            {isLoadingStats ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><RotateCcw className="mr-1.5 h-3.5 w-3.5" /> 再抽 1 次</>}
+                            <>
+                                <div className="grid grid-cols-2 gap-3 w-full">
+                                    {isLimitReachedForSingle ? (
+                                        <Button disabled className="col-span-2 h-14 text-sm font-black rounded-2xl bg-slate-800 text-slate-500 border border-slate-700 opacity-50 italic">
+                                            今日次數已用完
                                         </Button>
-                                        <Button 
-                                            className={cn(
-                                                "h-9 text-[10px] font-black rounded-xl transition-all shadow-lg",
-                                                (isLoadingStats || !canDraw3) ? "bg-slate-800 text-slate-500 border-slate-700 opacity-50" : "bg-accent text-accent-foreground hover:bg-accent/90"
-                                            )}
-                                            onClick={() => performDraw(3)} 
-                                            disabled={isLoadingStats || (cardPool?.remainingPacks ?? 0) < 3 || !canDraw3}
-                                        >
-                                            {isLoadingStats ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : !canDraw3 ? '今日額度不足三抽' : '再抽 3 次'}
+                                    ) : (
+                                        <>
+                                            <Button 
+                                                className={cn(
+                                                    "h-16 text-sm font-black border-2 transition-all shadow-xl rounded-2xl flex flex-col items-center justify-center gap-1",
+                                                    isLoadingStats ? "bg-slate-800 text-slate-500 border-slate-700 opacity-50" : "bg-slate-900 text-white border-white/10 hover:border-primary/50 hover:bg-slate-800"
+                                                )}
+                                                onClick={() => performDraw(1)} 
+                                                disabled={isLoadingStats || (cardPool?.remainingPacks ?? 0) < 1}
+                                            >
+                                                {isLoadingStats ? <Loader2 className="h-5 w-5 animate-spin" /> : 
+                                                    <>
+                                                        <span className="text-[12px] opacity-70">單抽</span>
+                                                        <span className="text-lg flex items-center font-headline"><Diamond className="w-4 h-4 mr-1 text-sky-400"/>{cardPool?.price}</span>
+                                                    </>
+                                                }
+                                            </Button>
+                                            <Button 
+                                                className={cn(
+                                                    "h-16 text-sm font-black rounded-2xl transition-all shadow-xl flex flex-col items-center justify-center gap-1",
+                                                    (isLoadingStats || !canDraw3) ? "bg-slate-800 text-slate-500 border border-slate-700 opacity-50" : "bg-primary text-primary-foreground hover:bg-primary/90"
+                                                )}
+                                                onClick={() => performDraw(3)} 
+                                                disabled={isLoadingStats || (cardPool?.remainingPacks ?? 0) < 3 || !canDraw3}
+                                            >
+                                                {isLoadingStats ? <Loader2 className="h-5 w-5 animate-spin" /> : !canDraw3 ? '今日額度不足' : 
+                                                    <>
+                                                        <span className="text-[12px] opacity-90">3 連抽</span>
+                                                        <span className="text-lg flex items-center font-headline"><Diamond className="w-4 h-4 mr-1"/>{cardPool?.price3Draws}</span>
+                                                    </>
+                                                }
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <Button asChild variant="outline" className="h-10 text-[11px] font-bold border-white/5 rounded-xl bg-white/5 hover:bg-white/10">
+                                        <Link href="/draw">返回卡池</Link>
+                                    </Button>
+                                    
+                                    {step === 'done' ? (
+                                        <Button asChild variant="outline" className="h-10 text-[11px] font-bold border-primary/40 text-primary rounded-xl bg-primary/5 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:bg-primary/10">
+                                            <Link href="/collection">前往收藏庫</Link>
                                         </Button>
-                                    </>
-                                )}
-                                <Button asChild variant="outline" className="h-9 text-[10px] font-black border-white/10 rounded-xl bg-white/5 hover:bg-white/10">
-                                    <Link href="/draw">返回卡池</Link>
-                                </Button>
-                                
-                                {step === 'done' ? (
-                                    <Button asChild variant="outline" className="h-9 text-[10px] font-black border-primary/40 text-primary rounded-xl bg-primary/5 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:bg-primary/10">
-                                        <Link href="/collection">前往收藏庫</Link>
-                                    </Button>
-                                ) : (
-                                    <Button 
-                                        onClick={() => setStep('done')} 
-                                        variant="outline" 
-                                        className="h-9 text-[10px] font-black border-primary/40 text-primary rounded-xl bg-primary/5 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:bg-primary/10 animate-pulse"
-                                    >
-                                        查看本次總結
-                                    </Button>
-                                )}
-                            </div>
+                                    ) : (
+                                        <Button 
+                                            onClick={() => setStep('done')} 
+                                            variant="outline" 
+                                            className="h-10 text-[11px] font-bold border-primary/40 text-primary rounded-xl bg-primary/5 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:bg-primary/10 animate-pulse"
+                                        >
+                                            查看本次總結
+                                        </Button>
+                                    )}
+                                </div>
+                            </>
                         )}
                     </div>
-                 )}
+                )}
             </div>
             
             <Dialog open={!!previewCard} onOpenChange={(open) => !open && setPreviewCard(null)}>

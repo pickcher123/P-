@@ -51,7 +51,7 @@ export function NewsMarquee({ isDrawing }: NewsMarqueeProps) {
         )}>
             <div className="flex items-center flex-1 overflow-hidden">
                 {/* 品牌標籤 - 移至左側，增加左邊距以對齊 Logo */}
-                <div className="px-2 md:px-5 z-20 flex items-center ml-1 md:ml-4">
+                <div className="px-2 md:px-5 z-20 flex items-center ml-40 md:ml-60">
                     <span className="text-[7px] md:text-[10px] font-black text-primary uppercase tracking-[0.2em] italic whitespace-nowrap drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] animate-pulse-slow">
                         NEWS
                     </span>
