@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Checkbox } from '@/components/ui/checkbox';
+import * as VisuallyHiddenPrimitive from "@radix-ui/react-visually-hidden";
 import { Ship, RefreshCw, Gem, Loader2, CheckSquare, Square, Shield, LayoutGrid, Users, Users2, MapPin, SearchCode, X, Sparkles, ChevronRight, Package, Library, Hash, Info, AlertTriangle, RotateCcw } from 'lucide-react';
 import { useCollection, useUser, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, doc, writeBatch, serverTimestamp, getDoc, increment, updateDoc } from 'firebase/firestore';
@@ -276,6 +277,12 @@ export default function CollectionPage() {
     <div className="container py-20 text-center animate-fade-in-up">
       <h2 className="text-2xl font-bold mb-4 text-white font-headline">請先登入以查看收藏庫</h2>
       <Button asChild className="rounded-xl"><Link href="/login">前往登入</Link></Button>
+    </div>
+  );
+
+  if (isUserLoading) return (
+    <div className="container py-20 text-center animate-fade-in-up">
+        <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" />
     </div>
   );
 
@@ -578,7 +585,7 @@ export default function CollectionPage() {
 
       <Dialog open={!!previewCard} onOpenChange={(open) => !open && setPreviewCard(null)}>
         <DialogContent className="max-w-[min(95vw,420px)] bg-transparent border-none shadow-none p-0 overflow-visible flex flex-col items-center justify-center gap-4 sm:gap-6 [&>button:last-child]:hidden">
-            <DialogTitle><VisuallyHidden>卡片預覽</VisuallyHidden></DialogTitle>
+            <DialogTitle><VisuallyHiddenPrimitive.Root>卡片預覽</VisuallyHiddenPrimitive.Root></DialogTitle>
             {previewCard && (
                 <div className="w-full flex flex-col items-center gap-4 sm:gap-6 animate-in zoom-in-95 duration-300">
                     <h2 className="text-[11px] sm:text-sm font-black font-headline text-white drop-shadow-2xl tracking-tight leading-tight uppercase px-6 text-center max-w-[280px]">{previewCard.name}</h2>

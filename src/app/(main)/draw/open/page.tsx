@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { VisuallyHidden } from '@/components/ui/visually-hidden';
+import * as VisuallyHiddenPrimitive from "@radix-ui/react-visually-hidden";
 import { Gem, Sparkles, Loader2, RotateCcw, ArrowLeft, PlayCircle, FastForward, Check, Disc3, RotateCw, Clock, ChevronsUp, X, ShieldCheck, Star, Trophy, Diamond, Layers, Zap, AlertCircle, Ban, ChevronRight, Hash } from 'lucide-react';
 import { PPlusIcon } from '@/components/icons';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -891,7 +891,7 @@ export default function OpenPackPage() {
             
             <Dialog open={!!previewCard} onOpenChange={(open) => !open && setPreviewCard(null)}>
                 <DialogContent className="max-w-[min(95vw,420px)] bg-transparent border-none p-0 flex flex-col items-center justify-center gap-4 sm:gap-6 [&>button:last-child]:hidden z-[200]">
-                    <DialogTitle><VisuallyHidden>卡片預覽</VisuallyHidden></DialogTitle>
+                    <DialogTitle><VisuallyHiddenPrimitive.Root>卡片預覽</VisuallyHiddenPrimitive.Root></DialogTitle>
                     {previewCard && (
                         <div className="w-full flex flex-col items-center gap-4 sm:gap-6">
                             <h2 className="text-[11px] sm:text-sm font-black text-white text-center px-4 uppercase">{previewCard.name}</h2>

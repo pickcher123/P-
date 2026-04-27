@@ -44,12 +44,22 @@ export async function resetLuckyBagParticipants(userId: string, luckyBagId: stri
 
     // 使用 Transaction 確保退款與狀態重置的一致性
     await adminDb.runTransaction(async (transaction) => {
-      // 1. 退款給玩家並建立紀錄
-      for (const [uid, refund] of Object.entries(userRefunds)) {
-        const userRef = adminDb.collection('users').doc(uid);
-        const userDoc = await transaction.get(userRef);
-        
-        if (userDoc.exists) {
+      // 1. 先執行所有讀取操作 (Reads must come before writes)
+      const uids = Object.keys(userRefunds);
+      const userRefs = uids.map(uid => adminDb.collection('users').doc(uid));
+      const userSnaps = await Promise.all(userRefs.map(ref => transaction.get(ref)));
+      
+      const userDocsMap: { [uid: string]: boolean } = {};
+      userSnaps.forEach((snap, index) => {
+        userDocsMap[uids[index]] = snap.exists;
+      });
+
+      // 2. 執行所有寫入操作
+      for (const uid of uids) {
+        if (userDocsMap[uid]) {
+          const refund = userRefunds[uid];
+          const userRef = adminDb.collection('users').doc(uid);
+          
           // 退款
           transaction.update(userRef, {
             points: admin.firestore.FieldValue.increment(refund.amount)
@@ -74,12 +84,12 @@ export async function resetLuckyBagParticipants(userId: string, luckyBagId: stri
         }
       }
 
-      // 2. 刪除所有購買紀錄
+      // 刪除所有購買紀錄
       purchasesSnap.docs.forEach(pDoc => {
         transaction.delete(pDoc.ref);
       });
 
-      // 3. 重置福袋狀態
+      // 重置福袋狀態
       const bagRef = adminDb.collection('luckBags').doc(luckyBagId);
       transaction.update(bagRef, {
         status: 'draft',

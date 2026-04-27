@@ -4,7 +4,7 @@ import { useState, ChangeEvent, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useDoc, useCollection, useFirestore, useMemoFirebase, useAuth } from '@/firebase';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { collection, doc, updateDoc, query, writeBatch, serverTimestamp, arrayUnion, arrayRemove, getDocs, addDoc } from 'firebase/firestore';
+import { collection, doc, updateDoc, query, writeBatch, serverTimestamp, arrayUnion, arrayRemove, getDocs, addDoc, increment } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Card as UICard, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Trash2, Image as ImageIcon, Upload, ArrowLeft, Check, Settings, Gem, Package, Users, Trophy, Eye, EyeOff, Search, Loader2, Sparkles, Copy, ListChecks, UserCheck, Archive, Play, ChevronUp, ChevronDown, RefreshCw } from 'lucide-react';
+import { PlusCircle, Trash2, Image as ImageIcon, Upload, ArrowLeft, Check, Settings, Gem, Package, Users, Trophy, Eye, EyeOff, Search, Loader2, Sparkles, Copy, ListChecks, UserCheck, Archive, Play, ChevronUp, ChevronDown, RefreshCw, Maximize2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,6 +35,7 @@ import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PPlusIcon } from '@/components/icons';
 import { resetLuckyBagParticipants } from '@/app/actions/lucky-bag';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 type LuckBagStatus = 'draft' | 'published' | '已開獎';
 type PrizeLevel = 'first' | 'second' | 'third';
@@ -126,6 +127,7 @@ export default function LuckBagDetailPage() {
   const [otherPrizeWinningNumbers, setOtherPrizeWinningNumbers] = useState<Record<string, string>>({});
   const [isDistributing, setIsDistributing] = useState(false);
   const [selectedCardsToAdd, setSelectedCardsToAdd] = useState<string[]>([]);
+  const [previewTarget, setPreviewTarget] = useState<{imageUrl: string, name: string} | null>(null);
 
 
   // Fetch Luck Bag details
@@ -474,7 +476,7 @@ export default function LuckBagDetailPage() {
                          // Handle points distribution
                          const userRef = doc(firestore, 'users', winnerId);
                          batch.update(userRef, {
-                             points: admin.firestore.FieldValue.increment(otherPrize.points || 0)
+                             points: increment(otherPrize.points || 0)
                          });
                          const txRef = doc(collection(firestore, 'transactions'));
                          batch.set(txRef, {
@@ -738,34 +740,42 @@ export default function LuckBagDetailPage() {
                                 {(['first', 'second', 'third'] as PrizeLevel[]).map((level) => (
                                     <div key={level} className="flex flex-col p-4 border rounded-xl bg-card/50 hover:border-primary/50 transition-all">
                                         <div className="flex items-center gap-4 mb-4">
-                                            <div className="relative w-16 h-20 bg-muted rounded-lg overflow-hidden shrink-0 border border-white/10 shadow-lg">
+                                            <div className="relative w-12 h-16 md:w-16 md:h-20 bg-muted rounded-lg overflow-hidden shrink-0 border border-white/10 shadow-lg">
                                                 {prizeCards[level] ? (
-                                                    <Image src={prizeCards[level]!.imageUrl} alt={prizeCards[level]!.name} fill className="object-cover" />
+                                                    <div className="relative w-full h-full group">
+                                                        <Image src={prizeCards[level]!.imageUrl} alt={prizeCards[level]!.name} fill className="object-cover" />
+                                                        <button 
+                                                            onClick={() => setPreviewTarget({ imageUrl: prizeCards[level]!.imageUrl, name: prizeCards[level]!.name })}
+                                                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                                        >
+                                                            <Maximize2 className="w-5 h-5 text-white" />
+                                                        </button>
+                                                    </div>
                                                 ) : (
                                                     <div className="flex items-center justify-center h-full"><Trophy className="w-6 h-6 text-muted-foreground opacity-20" /></div>
                                                 )}
                                             </div>
-                                            <div className="overflow-hidden">
-                                                <p className="text-[10px] font-black uppercase text-primary tracking-widest">{{first: 'Grand Prize 頭獎', second: 'Second Prize 貳獎', third: 'Third Prize 叁獎'}[level]}</p>
-                                                <p className="font-bold text-sm truncate">{prizeCards[level] ? prizeCards[level]!.name : '尚未設定'}</p>
+                                            <div className="overflow-hidden min-w-0">
+                                                <p className="text-[9px] md:text-[10px] font-black uppercase text-primary tracking-widest truncate">{{first: 'Grand Prize 頭獎', second: 'Second Prize 貳獎', third: 'Third Prize 叁獎'}[level]}</p>
+                                                <p className="font-bold text-xs md:text-sm truncate">{prizeCards[level] ? prizeCards[level]!.name : '尚未設定'}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex-1">
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                                            <div className="flex-1 w-full">
                                                 <Label className="text-[9px] uppercase font-bold text-muted-foreground mb-1 block">輸入中獎序號</Label>
                                                 <Input 
                                                     type="number" 
                                                     placeholder="例如: 8"
                                                     value={topPrizeWinningNumbers[level]}
                                                     onChange={(e) => setTopPrizeWinningNumbers(prev => ({...prev, [level]: e.target.value}))}
-                                                    className="font-code text-lg font-black"
+                                                    className="font-code text-base md:text-lg font-black h-9 md:h-10"
                                                 />
                                             </div>
                                             {topPrizeWinningNumbers[level] && (
-                                                <div className="pt-5 shrink-0">
-                                                    <Badge className="bg-primary/20 text-primary border-primary/30 h-10 px-3">
-                                                        <UserCheck className="w-3.5 h-3.5 mr-1.5"/> 
-                                                        {userMap.get(purchases?.find(p => p.spotNumber === parseInt(topPrizeWinningNumbers[level]))?.userId || '') || '號碼錯誤'}
+                                                <div className="sm:pt-5 shrink-0 w-full sm:w-auto">
+                                                    <Badge className="bg-primary/20 text-primary border-primary/30 h-8 md:h-10 px-2 md:px-3 w-full justify-center">
+                                                        <UserCheck className="w-3 h-3 md:w-3.5 md:h-3.5 mr-1 md:mr-1.5 shrink-0"/> 
+                                                        <span className="truncate">{userMap.get(purchases?.find(p => p.spotNumber === parseInt(topPrizeWinningNumbers[level]))?.userId || '') || '號碼錯誤'}</span>
                                                     </Badge>
                                                 </div>
                                             )}
@@ -1047,6 +1057,33 @@ export default function LuckBagDetailPage() {
                     </Button>
                 </DialogFooter>
             )}
+            </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!previewTarget} onOpenChange={(open) => !open && setPreviewTarget(null)}>
+            <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-[90vw] md:max-w-md flex flex-col items-center justify-center">
+                <VisuallyHidden>
+                    <DialogTitle>{previewTarget?.name || '卡片預覽'}</DialogTitle>
+                </VisuallyHidden>
+                {previewTarget && (
+                    <div className="relative aspect-[2.5/3.5] w-full animate-in zoom-in-95 duration-200">
+                        <Image 
+                            src={previewTarget.imageUrl} 
+                            alt={previewTarget.name} 
+                            fill 
+                            className="object-contain rounded-2xl drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" 
+                            priority
+                        />
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="absolute -top-4 -right-4 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md"
+                            onClick={() => setPreviewTarget(null)}
+                        >
+                            <X className="w-5 h-5" />
+                        </Button>
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     </div>
