@@ -431,6 +431,8 @@ export default function CardPoolDetailPage() {
     const available = allCards.filter(card => 
         !card.isSold && 
         !globallyAssignedCardIds.has(card.id) &&
+        !cardsInPoolIds.has(card.id) &&
+        card.id !== poolDetails.lastPrizeCardId &&
         card.source !== 'group-break'
     );
 

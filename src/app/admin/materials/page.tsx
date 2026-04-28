@@ -2,13 +2,14 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Image as ImageIcon, Wallpaper, Trash2, CheckCircle2, RefreshCw, Palette, BookOpen, Boxes, Loader2, Info } from 'lucide-react';
+import { Upload, Image as ImageIcon, Wallpaper, Trash2, CheckCircle2, RefreshCw, Palette, BookOpen, Boxes, Loader2, Info, Layers } from 'lucide-react';
 import { useFirestore, useDoc, useStorage, useMemoFirebase } from "@/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useState, ChangeEvent, useEffect, useCallback } from "react";
 import { SafeImage } from "@/components/safe-image";
@@ -121,17 +122,42 @@ export default function MaterialsAdminPage() {
                             <Label className="text-xs font-bold text-slate-500">上傳新背景</Label>
                             <Input type="file" onChange={e => { if(e.target.files?.[0]) { setSelectedBgFile(e.target.files[0]); setBgPreviewUrl(URL.createObjectURL(e.target.files[0])); }}} className="h-12 border-slate-200" />
                             {bgPreviewUrl && <Button onClick={() => handleUpload('bg')} className="w-full h-12 bg-slate-900 text-white font-bold rounded-xl">加入背景庫</Button>}
+                            <Button 
+                                variant="outline" 
+                                className="w-full h-12 border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200"
+                                onClick={() => updateDoc(systemConfigRef!, { backgroundUrl: null })}
+                            >
+                                清除當前背景圖片 (點回無背景)
+                            </Button>
                         </div>
-                        <div className="space-y-4">
-                            <Label className="text-xs font-bold text-slate-500 flex justify-between">背景不透明度 <span>{Math.round(currentOpacity * 100)}%</span></Label>
-                            <div className="p-6 bg-slate-50 border rounded-xl">
-                                <Slider value={[currentOpacity]} max={1} step={0.1} onValueChange={v => setCurrentOpacity(v[0])} onValueCommit={v => updateDoc(systemConfigRef!, { backgroundOpacity: v[0] })} />
+                        <div className="space-y-6">
+                            <div className="p-6 bg-slate-50 border rounded-2xl space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-sm font-bold flex items-center gap-2 tracking-tight">
+                                            <Layers className="w-4 h-4 text-primary" />
+                                            首頁 3D 浮動卡片背景
+                                        </Label>
+                                        <p className="text-[10px] text-muted-foreground">開啟後首頁將出現動態浮動卡片特效</p>
+                                    </div>
+                                    <Switch 
+                                        checked={systemConfig?.showFloatingBackground !== false} 
+                                        onCheckedChange={(v) => updateDoc(systemConfigRef!, { showFloatingBackground: v })} 
+                                    />
+                                </div>
                             </div>
-                            <div className="p-6 rounded-2xl bg-accent/5 border border-accent/20 space-y-3">
-                                <p className="text-[10px] text-accent font-black uppercase tracking-[0.2em] flex items-center gap-2"><Info className="w-3 h-3"/> 專業建議提示</p>
-                                <p className="text-xs text-muted-foreground leading-relaxed italic font-medium">
-                                    若您使用的背景圖片較為明亮或視覺雜亂，建議將不透明度調高至 <span className="text-white font-bold">85% 以上</span>，這能有效建立介面與背景的深度層次，確保玩家能輕鬆閱讀點數與獎項資訊。
-                                </p>
+
+                            <div className="space-y-4">
+                                <Label className="text-xs font-bold text-slate-500 flex justify-between">背景不透明度 <span>{Math.round(currentOpacity * 100)}%</span></Label>
+                                <div className="p-6 bg-slate-50 border rounded-xl">
+                                    <Slider value={[currentOpacity]} max={1} step={0.1} onValueChange={v => setCurrentOpacity(v[0])} onValueCommit={v => updateDoc(systemConfigRef!, { backgroundOpacity: v[0] })} />
+                                </div>
+                                <div className="p-6 rounded-2xl bg-accent/5 border border-accent/20 space-y-3">
+                                    <p className="text-[10px] text-accent font-black uppercase tracking-[0.2em] flex items-center gap-2"><Info className="w-3 h-3"/> 專業建議提示</p>
+                                    <p className="text-xs text-muted-foreground leading-relaxed italic font-medium">
+                                        若您使用的背景圖片較為明亮或視覺雜亂，建議將不透明度調高至 <span className="text-white font-bold">85% 以上</span>，這能有效建立介面與背景的深度層次，確保玩家能輕鬆閱讀點數與獎項資訊。
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

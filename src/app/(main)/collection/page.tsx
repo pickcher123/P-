@@ -587,10 +587,10 @@ export default function CollectionPage() {
         <DialogContent className="max-w-[min(95vw,420px)] bg-transparent border-none shadow-none p-0 overflow-visible flex flex-col items-center justify-center gap-4 sm:gap-6 [&>button:last-child]:hidden">
             <DialogTitle><VisuallyHiddenPrimitive.Root>卡片預覽</VisuallyHiddenPrimitive.Root></DialogTitle>
             {previewCard && (
-                <div className="w-full flex flex-col items-center gap-4 sm:gap-6 animate-in zoom-in-95 duration-300">
-                    <h2 className="text-[11px] sm:text-sm font-black font-headline text-white drop-shadow-2xl tracking-tight leading-tight uppercase px-6 text-center max-w-[280px]">{previewCard.name}</h2>
+                <div className="w-full flex flex-col items-center gap-6 sm:gap-8 pt-4 animate-in zoom-in-95 duration-300">
+                    <h2 className="text-base sm:text-xl font-black font-headline text-white drop-shadow-2xl tracking-tight leading-tight uppercase px-6 text-center max-w-[320px]">{previewCard.name}</h2>
                     
-                    <div className="w-[85%] sm:w-full max-w-[300px] sm:max-w-[230px] mx-auto relative group">
+                    <div className="w-[80%] sm:w-full max-w-[280px] sm:max-w-[240px] mx-auto relative group">
                         <div className="absolute -inset-4 bg-primary/20 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardItem 
                             name={previewCard.name} 

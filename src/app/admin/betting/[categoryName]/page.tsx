@@ -145,6 +145,7 @@ export default function BettingCategoryDetailPage() {
     const available = allCards.filter(card => 
         !card.isSold &&
         !globallyAssignedCardIds.has(card.id) &&
+        !cardsInBetIds.has(card.id) &&
         card.source !== 'group-break'
     );
     

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Package, Users2, ChevronRight, Trophy, Sparkles, Newspaper, Calendar, ShieldCheck, Zap, Target, Crown, Gem } from 'lucide-react';
 import { Logo, CrossedCardsIcon, LuckyBagIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit, doc } from 'firebase/firestore';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { NewsPopup } from '@/components/news-popup';
 import { SafeImage } from '@/components/safe-image';
+import { FloatingCardsBackground } from '@/components/floating-cards-background';
 
 interface NewsItem {
     id: string;
@@ -55,18 +56,19 @@ export default function Home() {
 
   const { data: partners, isLoading: isLoadingPartners } = useCollection<Partner>(partnersQuery);
 
+  const systemConfigRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'systemConfig', 'main');
+  }, [firestore]);
+  const { data: systemConfig } = useDoc<any>(systemConfigRef);
+
   return (
     <div className="flex flex-col min-h-screen">
       <NewsPopup />
       
       {/* Hero Section */}
       <section className="relative min-h-[85vh] md:min-h-[95vh] flex items-center justify-center overflow-hidden py-4 md:py-8">
-        <div className="absolute inset-0 z-0 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-background to-background" />
-            <div className="absolute top-1/6 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-primary/10 rounded-full blur-[80px] md:blur-[120px] animate-pulse-slow [will-change:transform]" />
-            <div className="absolute bottom-1/4 left-1/3 w-[200px] md:w-[400px] h-[200px] md:h-[400px] bg-accent/5 rounded-full blur-[60px] md:blur-[100px] animate-blob [will-change:transform]" />
-            <div className="absolute top-1/2 right-1/4 w-[250px] md:w-[500px] h-[250px] md:h-[500px] bg-primary/5 rounded-full blur-[80px] md:blur-[120px] animate-blob animation-delay-2000 [will-change:transform]" />
-        </div>
+        {(systemConfig?.showFloatingBackground !== false) && <FloatingCardsBackground />}
 
         <div className="container relative z-10 text-center space-y-6 md:space-y-10 px-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] md:text-xs font-black tracking-[0.3em] font-headline mb-2 md:mb-4 animate-fade-in-up uppercase">
@@ -105,7 +107,7 @@ export default function Home() {
       {/* 最新消息中心 */}
       <section className="relative py-20 md:py-32 bg-card/10 border-y border-white/5 overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -mr-80 -mt-80 pointer-events-none" />
-        <div className="container relative z-10">
+        <div className="container relative z-10 md:-translate-x-12 lg:-translate-x-24 transition-transform duration-700">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-16 gap-6">
                 <div className="space-y-2 md:space-y-4">
                     <div className="inline-flex items-center gap-2 text-primary font-bold font-headline tracking-[0.4em] text-[10px] md:text-xs">

@@ -10,6 +10,7 @@ export interface SystemConfig {
     logoUrl?: string;
     backgroundUrl?: string;
     aboutOriginImageUrl?: string; // 新增：關於頁面起源圖片
+    showFloatingBackground?: boolean; // 新增：首頁 3D 浮動卡片動態背景開關
     backgroundOpacity?: number;
     cardOpacity?: number; // 新增：遊戲卡片不透明度
     liveYoutubeUrl?: string;

@@ -88,7 +88,7 @@ export function CardItem({ name, imageUrl, backImageUrl, imageHint, rarity, seri
         className={cn(
           "relative w-full h-full rounded-xl transition-transform duration-700 [transform-style:preserve-3d] bg-transparent",
           isFlippable && "cursor-pointer",
-          isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
+          isFlipped ? '[transform:rotateY(180deg)_scale(0.8)]' : '[transform:rotateY(0deg)_scale(1)]'
         )}
       >
         {/* Card Front */}
@@ -215,10 +215,11 @@ export function CardItem({ name, imageUrl, backImageUrl, imageHint, rarity, seri
              <div className="w-full h-full flex flex-col items-center justify-center p-4 relative rounded-xl bg-slate-900">
                 <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '16px 16px' }} />
                 <div className="relative flex flex-col items-center z-10">
-                    <div className="p-3 rounded-full bg-primary/10 border border-primary/20 mb-3 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                    <div className="p-3 rounded-full bg-primary/10 border border-primary/20 mb-2 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
                         <Gem className="w-6 h-6 text-primary opacity-80" />
                     </div>
-                    <span className="font-headline text-sm font-black text-primary tracking-[0.2em] opacity-60 italic">P+ CARDER</span>
+                    <span className="font-headline text-[10px] font-black text-primary tracking-[0.2em] opacity-60 italic mb-2">P+ CARDER</span>
+                    <p className="text-xs font-black text-white px-4 text-center line-clamp-2">{name}</p>
                     <div className="mt-4 text-[8px] text-muted-foreground uppercase tracking-[0.4em] font-code opacity-40">Verified Digital Asset</div>
                 </div>
                 <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-primary/20" />

@@ -469,9 +469,9 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
                         <VisuallyHidden>卡片預覽</VisuallyHidden>
                     </DialogTitle>
                     {previewCard && (
-                        <div className="w-full flex flex-col items-center gap-4 sm:gap-6">
-                            <h2 className="text-sm font-black text-white text-center px-4">{previewCard.name}</h2>
-                            <div className="w-[85%] sm:w-full max-w-[360px]">
+                        <div className="w-full flex flex-col items-center gap-6 sm:gap-8 pt-4">
+                            <h2 className="text-base sm:text-lg font-black text-white text-center px-4 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">{previewCard.name}</h2>
+                            <div className="w-[80%] sm:w-full max-w-[320px]">
                                 {previewCard.isPoints ? (
                                     <div className={cn("w-full aspect-[2.5/4] rounded-3xl flex flex-col items-center justify-center p-4 border shadow-2xl", pointPrizeStyles[previewCard.rarity as Rarity].bg, pointPrizeStyles[previewCard.rarity as Rarity].border)}>
                                         <PPlusIcon className={cn("w-20 h-20 mb-4", pointPrizeStyles[previewCard.rarity as Rarity].text)} />

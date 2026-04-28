@@ -585,18 +585,31 @@ export default function LuckBagDetailPage() {
     if (!allCards) return [];
     
     // ENFORCE RULE: Filter out cards assigned to other areas
-    const currentBagCardIds = new Set([
-        luckBag?.prizes?.first,
-        luckBag?.prizes?.second,
-        luckBag?.prizes?.third,
-        ...(luckBag?.otherPrizes?.map(p => p.cardId) || [])
-    ]);
-
-    return allCards.filter(c => 
-        (!c.isSold && !globallyAssignedCardIds.has(c.id)) || 
-        currentBagCardIds.has(c.id)
-    );
-  }, [allCards, globallyAssignedCardIds, luckBag]);
+    // Also, if we are editing a specific prizelevel, we want to see the card currently IN that level,
+    // but we MUST EXCLUDE cards assigned to OTHER levels in this same bag.
+    
+    const otherLevelsInBag = new Set<string>();
+    if (selectedPrizeLevel !== 'first' && luckBag?.prizes?.first) otherLevelsInBag.add(luckBag.prizes.first);
+    if (selectedPrizeLevel !== 'second' && luckBag?.prizes?.second) otherLevelsInBag.add(luckBag.prizes.second);
+    if (selectedPrizeLevel !== 'third' && luckBag?.prizes?.third) otherLevelsInBag.add(luckBag.prizes.third);
+    
+    // For "other" prizes, it's a bit different since it's a list
+    const otherPrizesIds = new Set(luckBag?.otherPrizes?.map(p => p.cardId).filter((id): id is string => !!id) || []);
+    
+    return allCards.filter(c => {
+        // Basic: Must not be sold and not in other areas
+        const isFree = !c.isSold && !globallyAssignedCardIds.has(c.id);
+        
+        if (selectedPrizeLevel === 'other') {
+            // Adding to other prizes: must be free AND not already in "other prizes"
+            return isFree && !otherPrizesIds.has(c.id);
+        } else {
+            // Selecting for first/second/third: 
+            // Must be free AND NOT in any of the OTHER specific levels
+            return isFree && !otherLevelsInBag.has(c.id);
+        }
+    });
+  }, [allCards, globallyAssignedCardIds, luckBag, selectedPrizeLevel]);
 
   if (isLoadingBag || !bagDetails) {
     return <div className="container p-8"><Skeleton className="w-full h-96" /></div>;

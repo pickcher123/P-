@@ -13,13 +13,19 @@ export async function resetLuckyBagParticipants(userId: string, luckyBagId: stri
       throw new Error('只有超級管理員可以執行此操作');
     }
 
-    // 2. 獲取所有購買紀錄並進行退款統計
-    const purchasesRef = adminDb.collection('luckBags').doc(luckyBagId).collection('luckBagPurchases');
+    // 2. 獲取福袋資訊與所有購買紀錄
+    const bagRef = adminDb.collection('luckBags').doc(luckyBagId);
+    const bagSnap = await bagRef.get();
+    if (!bagSnap.exists) throw new Error('福袋不存在');
+    const bagData = bagSnap.data() as any;
+    const bagPrice = bagData.price || 0;
+
+    const purchasesRef = bagRef.collection('luckBagPurchases');
     const purchasesSnap = await purchasesRef.get();
     
     if (purchasesSnap.empty) {
       // 如果沒有參與者，直接重置並返回
-      await adminDb.collection('luckBags').doc(luckyBagId).update({
+      await bagRef.update({
         status: 'draft',
         revealLottery: false,
         winners: {}
@@ -32,8 +38,9 @@ export async function resetLuckyBagParticipants(userId: string, luckyBagId: stri
     purchasesSnap.docs.forEach(doc => {
       const data = doc.data();
       const uid = data.userId;
-      const price = data.price || 0;
-      const slotNum = data.number;
+      // 使用福袋當前價格作為退款基準，因為購買紀錄中沒存價格
+      const price = bagPrice;
+      const slotNum = data.spotNumber;
 
       if (!userRefunds[uid]) {
         userRefunds[uid] = { amount: 0, slots: [] };
@@ -41,6 +48,10 @@ export async function resetLuckyBagParticipants(userId: string, luckyBagId: stri
       userRefunds[uid].amount += price;
       if (slotNum !== undefined) userRefunds[uid].slots.push(slotNum);
     });
+
+    // 獲取幣別
+    const currency = bagData.currency || 'p-point';
+    const walletField = currency === 'diamond' ? 'points' : 'bonusPoints';
 
     // 使用 Transaction 確保退款與狀態重置的一致性
     await adminDb.runTransaction(async (transaction) => {
@@ -60,9 +71,9 @@ export async function resetLuckyBagParticipants(userId: string, luckyBagId: stri
           const refund = userRefunds[uid];
           const userRef = adminDb.collection('users').doc(uid);
           
-          // 退款
+          // 退款至正確的錢包
           transaction.update(userRef, {
-            points: admin.firestore.FieldValue.increment(refund.amount)
+            [walletField]: admin.firestore.FieldValue.increment(refund.amount)
           });
 
           // 建立交易紀錄
@@ -70,12 +81,13 @@ export async function resetLuckyBagParticipants(userId: string, luckyBagId: stri
           transaction.set(txRef, {
             userId: uid,
             amount: refund.amount,
+            currency: currency, // 記錄幣別
             transactionType: 'Refund',
             section: 'lucky-bag',
             source: 'lucky-bag',
             metadata: {
               luckBagId: luckyBagId,
-              message: `福袋活動重置退款 (共 ${refund.slots.length} 格)`,
+              message: `福袋活動重置退款 (${currency === 'diamond' ? '鑽石' : 'P+卡幣'}, 共 ${refund.slots.length} 格)`,
               slots: refund.slots
             },
             transactionDate: admin.firestore.FieldValue.serverTimestamp(),

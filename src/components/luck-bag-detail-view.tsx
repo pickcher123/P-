@@ -388,9 +388,9 @@ export function LuckBagDetailView({ luckBag }: { luckBag: LuckBagWithCount }) {
                         <VisuallyHidden>卡片預覽</VisuallyHidden>
                     </DialogTitle>
                     {previewCard && (
-                        <div className="w-full flex flex-col items-center gap-4 sm:gap-6">
-                            <h2 className="text-sm font-black text-white text-center px-4">{previewCard.name}</h2>
-                            <div className="w-[85%] sm:w-full max-w-[360px]">
+                        <div className="w-full flex flex-col items-center gap-6 sm:gap-8 pt-4">
+                            <h2 className="text-base sm:text-lg font-black text-white text-center px-4 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">{previewCard.name}</h2>
+                            <div className="w-[80%] sm:w-full max-w-[320px]">
                                 <CardItem name={previewCard.name} imageUrl={previewCard.imageUrl} backImageUrl={previewCard.backImageUrl} imageHint={previewCard.name} rarity="legendary" isFlippable={true}/>
                             </div>
                         </div>
