@@ -121,7 +121,7 @@ export default function Home() {
       {/* 最新消息中心 */}
       <section className="relative py-20 md:py-32 bg-card/10 border-y border-white/5 overflow-hidden">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] -mr-80 -mt-80 pointer-events-none" />
-        <div className="container relative z-10 md:-translate-x-12 lg:-translate-x-24 transition-transform duration-700">
+        <div className="container relative z-10 transition-transform duration-700">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-16 gap-6">
                 <div className="space-y-2 md:space-y-4">
                     <div className="inline-flex items-center gap-2 text-primary font-bold font-headline tracking-[0.4em] text-[10px] md:text-xs">
