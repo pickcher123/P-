@@ -53,9 +53,9 @@ export function FloatingCardsBackground() {
       ? dbCards.map(c => c.imageUrl) 
       : FALLBACK_IMAGES;
 
-    const count = Math.max(35, images.length * 2);
+    const count = 10;
     
-    return Array.from({ length: Math.min(count, 60) }).map((_, i) => ({
+    return Array.from({ length: count }).map((_, i) => ({
       id: i,
       image: images[i % images.length],
       x: Math.random() * 100,
