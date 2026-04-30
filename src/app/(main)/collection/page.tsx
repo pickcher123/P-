@@ -14,6 +14,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -62,6 +68,8 @@ interface AllCards {
     imageHint: string;
     sellPrice?: number;
     isSold?: boolean;
+    category?: string; // Add this
+    teamName?: string; // Maybe add this too
 }
 
 type MergedCard = UserCard & AllCards & { serialNumber: string };
@@ -82,6 +90,8 @@ export default function CollectionPage() {
   const [shippingName, setShippingName] = useState('');
   const [shippingPhone, setShippingPhone] = useState('');
   const [shippingAddress, setShippingAddress] = useState('');
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<'price' | 'unsold' | 'latest'>('latest');
 
   const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user?.uid) return null;
@@ -117,6 +127,7 @@ export default function CollectionPage() {
         return {
           ...cardDetails,
           ...userCard,
+          category: (userCard.category && userCard.category !== 'all') ? userCard.category : (cardDetails.category || userCard.category || 'general'),
           serialNumber: userCard.serialNumber || '0000'
         }
       }
@@ -124,8 +135,21 @@ export default function CollectionPage() {
     }).filter((c): c is MergedCard => c !== null);
   }, [userCards, allCards]);
 
-  const standardCards = useMemo(() => mergedCards.filter(c => c.source !== 'group-break'), [mergedCards]);
-  const groupBreakCards = useMemo(() => mergedCards.filter(c => c.source === 'group-break'), [mergedCards]);
+  const sortedMergedCards = useMemo(() => {
+      let sorted = [...mergedCards];
+      if (sortOption === 'price') sorted.sort((a,b) => (b.sellPrice || 0) - (a.sellPrice || 0));
+      else if (sortOption === 'unsold') sorted.sort((a,b) => (a.isSold ? 1 : -1) - (b.isSold ? 1 : -1));
+      // latest increase is hard to know without timestamp on userCards, assuming index order is okay
+      return sorted;
+  }, [mergedCards, sortOption]);
+
+  const filteredMergedCards = useMemo(() => {
+      if (!filterCategory) return sortedMergedCards;
+      return sortedMergedCards.filter(c => c.category === filterCategory);
+  }, [sortedMergedCards, filterCategory]);
+
+  const standardCards = useMemo(() => filteredMergedCards.filter(c => c.source !== 'group-break'), [filteredMergedCards]);
+  const groupBreakCards = useMemo(() => filteredMergedCards.filter(c => c.source === 'group-break'), [filteredMergedCards]);
 
   const hasFreeShipping = useMemo(() => {
       if (!userProfile || !systemConfig?.levelBenefits) return false;
@@ -319,9 +343,9 @@ export default function CollectionPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="font-headline text-5xl md:text-7xl font-black tracking-tighter text-white mb-4 italic"
+            className="font-headline text-3xl font-black tracking-[0.2em] sm:text-6xl text-white drop-shadow-[0_0_15px_rgba(6,182,212,0.4)] mb-4 px-4 break-words text-center"
           >
-            我的<span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/30">數位收藏</span>
+            我的<span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/30">收藏</span>
           </motion.h1>
           
           <motion.p 
@@ -341,217 +365,218 @@ export default function CollectionPage() {
                     initial={{ y: 100, opacity: 0, x: '-50%' }}
                     animate={{ y: 0, opacity: 1, x: '-50%' }}
                     exit={{ y: 100, opacity: 0, x: '-50%' }}
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl"
+                    className="fixed bottom-[75px] md:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl"
                 >
-                    <div className="bg-slate-900/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-4 md:p-6 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col md:flex-row items-center gap-6 justify-between">
-                        <div className="flex items-center gap-5">
-                            <div className="relative">
+                    <div className="bg-slate-900/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-3 md:p-6 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col md:flex-row items-center gap-3 md:gap-6 justify-between">
+                        <div className="flex items-center gap-3 md:gap-5 w-full md:w-auto">
+                            <div className="relative shrink-0">
                                 <div className="absolute inset-0 bg-primary/20 blur-md rounded-xl" />
-                                <div className="relative bg-slate-950 p-4 rounded-xl border border-primary/30">
-                                    <Package className="w-6 h-6 text-primary" />
+                                <div className="relative bg-slate-950 p-3 md:p-4 rounded-xl border border-primary/30">
+                                    <Package className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                                 </div>
-                                <div className="absolute -top-2 -right-2 bg-primary text-black text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg">
+                                <div className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-primary text-black text-[9px] md:text-[10px] font-black w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center shadow-lg">
                                     {selectedCardIds.size}
                                 </div>
                             </div>
                             
-                            <div className="space-y-1">
-                                <p className="text-white font-black text-lg tracking-tight">已選擇卡片</p>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2 group cursor-help">
-                                        <Gem className="w-3.5 h-3.5 text-primary" />
-                                        <span className="text-sm font-code font-black text-white">{conversionValues.diamonds.toLocaleString()}</span>
+                            <div className="space-y-0.5">
+                                <p className="text-white font-black text-sm md:text-lg tracking-tight">已選擇卡片</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1.5 group">
+                                        <Gem className="w-3 h-3 text-primary" />
+                                        <span className="text-xs font-code font-black text-white">{conversionValues.diamonds.toLocaleString()}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 group cursor-help">
-                                        <PPlusIcon className="w-3.5 h-3.5 text-accent" />
-                                        <span className="text-sm font-code font-black text-white">{conversionValues.pPoints.toLocaleString()}</span>
+                                    <div className="flex items-center gap-1.5 group">
+                                        <PPlusIcon className="w-3 h-3 text-accent" />
+                                        <span className="text-xs font-code font-black text-white">{conversionValues.pPoints.toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full md:w-auto">
+                        <div className="flex items-center gap-2 w-full md:w-auto mt-1 md:mt-0">
                             <Button 
                                 variant="ghost" 
                                 size="sm" 
                                 onClick={handleClearSelection}
-                                className="h-12 rounded-2xl hover:bg-white/5 text-slate-400 font-bold px-6"
+                                className="h-10 md:h-12 rounded-xl hover:bg-white/5 text-slate-400 font-bold px-3 md:px-6 text-xs md:text-sm"
                             >
-                                <RotateCcw className="mr-2 h-4 w-4" /> 清除所選
+                                <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> 清除
                             </Button>
                             
-                            <div className="flex gap-2 flex-1 md:flex-none">
+                            <div className="flex gap-2 flex-1">
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button className="flex-1 md:flex-none h-14 px-8 rounded-2xl bg-white text-black hover:bg-slate-200 font-black transition-all active:scale-95 shadow-xl">
-                                            <Ship className="mr-2 h-5 w-5" /> 批量出貨
+                                        <Button className="flex-1 h-10 md:h-12 rounded-xl bg-white text-black hover:bg-slate-200 font-black transition-all active:scale-95 shadow-xl text-xs md:text-sm">
+                                            <Ship className="mr-1 h-4 w-4" /> 批量出貨
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-[3rem] bg-slate-950 border-white/5 shadow-3xl text-white p-8 md:p-12 overflow-hidden max-w-2xl">
-                                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-                                            <Ship className="w-64 h-64 text-primary" />
+                                    <AlertDialogContent className="rounded-[2rem] md:rounded-[3rem] bg-slate-950 border-white/5 shadow-3xl text-white p-3 md:p-12 overflow-hidden max-w-[95vw] md:max-w-2xl">
+                                        <div className="absolute top-0 right-0 p-4 md:p-12 opacity-5 pointer-events-none">
+                                            <Ship className="w-24 h-24 md:w-64 md:h-64 text-primary" />
                                         </div>
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle className="text-3xl font-black italic tracking-tighter text-white flex items-center gap-4">
+                                            <AlertDialogTitle className="text-lg md:text-3xl font-black italic tracking-tighter text-white flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
                                                 DELIVERY REQUEST
-                                                {hasFreeShipping && <Badge className="bg-emerald-500 text-black font-black border-none animate-pulse">FREE SHIP</Badge>}
+                                                {hasFreeShipping && <Badge className="bg-emerald-500 text-black font-black border-none animate-pulse w-max text-[10px]">FREE SHIP</Badge>}
                                             </AlertDialogTitle>
-                                            <AlertDialogDescription className="text-slate-400 font-medium text-lg mt-2">
+                                            <AlertDialogDescription className="text-slate-400 font-medium text-xs md:text-lg mt-0.5 md:mt-2">
                                                 請填寫您的收件資訊，我們將盡速為您安排配送。
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
-                                        <div className="space-y-8 my-8 relative z-10">
-                                            <RadioGroup defaultValue="7-11" onValueChange={(value: ShippingMethod) => setShippingMethod(value)} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                                <div className={cn("flex flex-col gap-2 border p-5 rounded-3xl transition-all cursor-pointer", shippingMethod === '7-11' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
+                                        <div className="space-y-2 md:space-y-8 my-2 md:my-8 relative z-10">
+                                            <RadioGroup defaultValue="7-11" onValueChange={(value: ShippingMethod) => setShippingMethod(value)} className="grid grid-cols-3 gap-1 md:gap-4">
+                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-1.5 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '7-11' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
                                                     <div className="flex justify-between items-center">
-                                                        <RadioGroupItem value="7-11" id="r1" className="border-white/20 text-primary" />
-                                                        <Package className="w-4 h-4 text-primary/40" />
+                                                        <RadioGroupItem value="7-11" id="r1" className="border-white/20 text-primary scale-50" />
+                                                        <Package className="w-2.5 h-2.5 md:w-4 md:h-4 text-primary/40" />
                                                     </div>
-                                                    <Label htmlFor="r1" className="cursor-pointer font-black text-sm text-white mt-2">7-11 門市</Label>
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase">{hasFreeShipping ? '運費 0' : `${SHIPPING_FEE} DIAMONDS`}</p>
+                                                    <Label htmlFor="r1" className="cursor-pointer font-black text-[8px] md:text-sm text-white mt-0.5">7-11</Label>
+                                                    <p className="text-[7px] md:text-[10px] text-slate-500 font-bold uppercase truncate">{hasFreeShipping ? '運 0' : `${SHIPPING_FEE}`}</p>
                                                 </div>
-                                                <div className={cn("flex flex-col gap-2 border p-5 rounded-3xl transition-all cursor-pointer", shippingMethod === '郵寄' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
+                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-1.5 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '郵寄' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
                                                     <div className="flex justify-between items-center">
-                                                        <RadioGroupItem value="郵寄" id="r2" className="border-white/20 text-primary" />
-                                                        <MapPin className="w-4 h-4 text-primary/40" />
+                                                        <RadioGroupItem value="郵寄" id="r2" className="border-white/20 text-primary scale-50" />
+                                                        <MapPin className="w-2.5 h-2.5 md:w-4 md:h-4 text-primary/40" />
                                                     </div>
-                                                    <Label htmlFor="r2" className="cursor-pointer font-black text-sm text-white mt-2">實體郵寄</Label>
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase">{hasFreeShipping ? '運費 0' : `${SHIPPING_FEE} DIAMONDS`}</p>
+                                                    <Label htmlFor="r2" className="cursor-pointer font-black text-[8px] md:text-sm text-white mt-0.5">郵寄</Label>
+                                                    <p className="text-[7px] md:text-[10px] text-slate-500 font-bold uppercase truncate">{hasFreeShipping ? '運 0' : `${SHIPPING_FEE}`}</p>
                                                 </div>
-                                                <div className={cn("flex flex-col gap-2 border p-5 rounded-3xl transition-all cursor-pointer", shippingMethod === '面交自取' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
+                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-1.5 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '面交自取' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
                                                     <div className="flex justify-between items-center">
-                                                        <RadioGroupItem value="面交自取" id="r3" className="border-white/20 text-primary" />
-                                                        <Users className="w-4 h-4 text-primary/40" />
+                                                        <RadioGroupItem value="面交自取" id="r3" className="border-white/20 text-primary scale-50" />
+                                                        <Users className="w-2.5 h-2.5 md:w-4 md:h-4 text-primary/40" />
                                                     </div>
-                                                    <Label htmlFor="r3" className="cursor-pointer font-black text-sm text-white mt-2">面交自取</Label>
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase">NO FEE</p>
+                                                    <Label htmlFor="r3" className="cursor-pointer font-black text-[8px] md:text-sm text-white mt-0.5">自取</Label>
+                                                    <p className="text-[7px] md:text-[10px] text-slate-500 font-bold uppercase truncate">NO FEE</p>
                                                 </div>
                                             </RadioGroup>
                                             
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="space-y-3">
-                                                    <Label className="text-[11px] uppercase font-black text-slate-500 tracking-[0.2em] ml-1">Recipient Name</Label>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-6">
+                                                <div className="space-y-0.5 md:space-y-3">
+                                                    <Label className="text-[8px] md:text-[11px] uppercase font-black text-slate-500 tracking-[0.2em] ml-1">Name</Label>
                                                     <Input 
                                                         value={shippingName} 
                                                         onChange={(e) => setShippingName(e.target.value)} 
-                                                        className="h-14 bg-slate-900/50 backdrop-blur-md rounded-2xl text-white border-white/5 focus:border-primary/50 transition-all font-bold"
+                                                        className="h-8 md:h-14 bg-slate-900/50 backdrop-blur-md rounded-lg md:rounded-2xl text-white border-white/5 focus:border-primary/50 transition-all font-bold text-xs"
                                                         placeholder="收件人全名"
                                                     />
                                                 </div>
-                                                <div className="space-y-3">
-                                                    <Label className="text-[11px] uppercase font-black text-slate-500 tracking-[0.2em] ml-1">Contact Phone</Label>
+                                                <div className="space-y-0.5 md:space-y-3">
+                                                    <Label className="text-[8px] md:text-[11px] uppercase font-black text-slate-500 tracking-[0.2em] ml-1">Phone</Label>
                                                     <Input 
                                                         value={shippingPhone} 
                                                         onChange={(e) => setShippingPhone(e.target.value)} 
-                                                        className="h-14 bg-slate-900/50 backdrop-blur-md rounded-2xl text-white border-white/5 focus:border-primary/50 transition-all font-bold"
+                                                        className="h-8 md:h-14 bg-slate-900/50 backdrop-blur-md rounded-lg md:rounded-2xl text-white border-white/5 focus:border-primary/50 transition-all font-bold text-xs"
                                                         placeholder="聯絡電話"
                                                     />
                                                 </div>
                                             </div>
                                             
-                                            <div className="space-y-3">
-                                                <Label className="text-[11px] uppercase font-black text-slate-500 tracking-[0.2em] ml-1">{addressLabel}</Label>
+                                            <div className="space-y-0.5 md:space-y-3">
+                                                <Label className="text-[8px] md:text-[11px] uppercase font-black text-slate-500 tracking-[0.2em] ml-1">{addressLabel}</Label>
                                                 {shippingMethod === '面交自取' ? (
-                                                    <div className="p-6 bg-primary/5 rounded-[2rem] border border-dashed border-primary/30 space-y-3">
-                                                        <p className="text-base font-black text-primary flex items-center gap-3">
-                                                            <MapPin className="w-5 h-5" />
+                                                    <div className="p-2 md:p-6 bg-primary/5 rounded-lg md:rounded-[2rem] border border-dashed border-primary/30 space-y-0.5 md:space-y-3">
+                                                        <p className="text-[10px] md:text-base font-black text-primary flex items-center gap-1 md:gap-3">
+                                                            <MapPin className="w-3 h-3 md:w-5 md:h-5" />
                                                             {PICKUP_ADDRESS}
                                                         </p>
-                                                        <p className="text-xs text-slate-400 font-medium leading-relaxed italic">
+                                                        <p className="text-[7px] md:text-xs text-slate-400 font-medium leading-relaxed italic">
                                                             * 注意：自取需事先完成預約。
                                                         </p>
                                                     </div>
                                                 ) : (
                                                     <div className="relative">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                                                            <SearchCode className="w-5 h-5" />
+                                                        <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                                                            <SearchCode className="w-3 h-3 md:w-5 md:h-5" />
                                                         </div>
                                                         <Input 
                                                             value={shippingAddress} 
                                                             onChange={(e) => setShippingAddress(e.target.value)} 
-                                                            placeholder={shippingMethod === '7-11' ? "請輸入 7-11 門市名稱或店號" : "請輸入詳細配送地址"}
-                                                            className="h-16 pl-12 bg-slate-900/50 backdrop-blur-md rounded-2xl text-white border-white/5 focus:border-primary/50 transition-all font-bold"
+                                                            placeholder={shippingMethod === '7-11' ? "門市名稱或店號" : "詳細配送地址"}
+                                                            className="h-8 md:h-16 pl-8 md:pl-12 bg-slate-900/50 backdrop-blur-md rounded-lg md:rounded-2xl text-white border-white/5 focus:border-primary/50 transition-all font-bold text-xs"
                                                         />
                                                     </div>
                                                 )}
                                             </div>
 
-                                            <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/20 flex items-start gap-4">
-                                                <div className="p-3 bg-amber-500/10 rounded-2xl">
-                                                    <AlertTriangle className="w-5 h-5 text-amber-500" />
+                                            <div className="p-2 md:p-6 rounded-lg md:rounded-[2rem] bg-amber-500/5 border border-amber-500/20 flex items-start gap-1.5 md:gap-4">
+                                                <div className="p-1.5 md:p-3 bg-amber-500/10 rounded-md md:rounded-2xl">
+                                                    <AlertTriangle className="w-3 h-3 md:w-5 md:h-5 text-amber-500" />
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-xs font-black text-amber-500 uppercase tracking-widest">重要安全提醒</p>
-                                                    <p className="text-[11px] font-bold text-amber-200/60 leading-relaxed">
-                                                        所有包裹出貨前皆會進行數位化存證。為保障您的權益，請務必【全程錄影開箱】，若無影片佐證，恕不受理任何瑕疵退換貨。
+                                                <div className="space-y-0.5">
+                                                    <p className="text-[7px] md:text-xs font-black text-amber-500 uppercase tracking-widest">重要安全提醒</p>
+                                                    <p className="text-[7px] md:text-[11px] font-bold text-amber-200/60 leading-relaxed">
+                                                        包裹出貨錄影存證。請務必【全程錄影開箱】，否則不受理退換貨。
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
-                                        <AlertDialogFooter className="gap-4">
-                                            <AlertDialogCancel className="h-16 rounded-[2rem] font-bold bg-white/5 border-white/5 text-white hover:bg-white/10 px-8">取消操作</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleShipping} disabled={isProcessing} className="h-16 rounded-[2rem] font-black bg-primary text-black hover:bg-primary/90 shadow-2xl px-12">
+                                        <AlertDialogFooter className="gap-1 md:gap-4">
+                                            <AlertDialogCancel className="h-8 md:h-16 rounded-lg md:rounded-[2rem] font-bold bg-white/5 border-white/5 text-white hover:bg-white/10 px-3 md:px-8 text-[10px] md:text-sm">取消</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleShipping} disabled={isProcessing} className="h-8 md:h-16 rounded-lg md:rounded-[2rem] font-black bg-primary text-black hover:bg-primary/90 shadow-2xl px-4 md:px-12 text-[10px] md:text-sm">
                                                 {isProcessing ? <Loader2 className="animate-spin" /> : '確認申請與支付'}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
+
                                 </AlertDialog>
 
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="outline" className="flex-1 md:flex-none h-14 px-8 rounded-2xl border-white/10 bg-slate-950/50 text-white hover:bg-white/5 font-bold transition-all active:scale-95 shadow-xl">
-                                            <RefreshCw className="mr-2 h-5 w-5 text-primary" /> 快速轉點
+                                        <Button variant="outline" className="flex-1 h-10 md:h-12 rounded-xl border-white/10 bg-slate-950/50 text-white hover:bg-white/5 font-bold transition-all active:scale-95 shadow-xl text-xs md:text-sm">
+                                            <RefreshCw className="mr-1 h-4 w-4 text-primary" /> 快速轉點
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent className="rounded-[3rem] bg-slate-950 border-white/5 shadow-3xl text-white p-8 md:p-12 overflow-hidden max-w-xl">
-                                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
-                                            <RefreshCw className="w-64 h-64 text-destructive" />
+                                    <AlertDialogContent className="rounded-[2rem] md:rounded-[3rem] bg-slate-950 border-white/5 shadow-3xl text-white p-4 md:p-12 overflow-hidden max-w-[90vw] md:max-w-xl">
+                                        <div className="absolute top-0 right-0 p-6 md:p-12 opacity-5 pointer-events-none">
+                                            <RefreshCw className="w-32 h-32 md:w-64 md:h-64 text-destructive" />
                                         </div>
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle className="text-3xl font-black italic tracking-tighter text-white flex items-center gap-4">
+                                            <AlertDialogTitle className="text-xl md:text-3xl font-black italic tracking-tighter text-white flex items-center gap-2 md:gap-4">
                                                 ASSET RECOVERY
                                             </AlertDialogTitle>
-                                            <AlertDialogDescription className="text-slate-400 font-medium text-lg mt-2">
+                                            <AlertDialogDescription className="text-slate-400 font-medium text-sm md:text-lg mt-1 md:mt-2">
                                                 將卡片資產轉換為數位代幣。此操作具有不可逆性。
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
-                                        <div className="space-y-8 my-8 relative z-10">
-                                            <div className="bg-slate-900 border border-white/5 p-8 rounded-[2.5rem] space-y-6 shadow-2xl">
-                                                <div className="flex justify-between items-center border-b border-white/5 pb-6">
-                                                    <div className="space-y-1">
-                                                        <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest leading-none">獲得鑽石獲取</p>
-                                                        <p className="text-xs text-slate-600 font-bold">💎 鑽石資產</p>
+                                        <div className="space-y-4 md:space-y-8 my-4 md:my-8 relative z-10">
+                                            <div className="bg-slate-900 border border-white/5 p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] space-y-3 md:space-y-6 shadow-2xl">
+                                                <div className="flex justify-between items-center border-b border-white/5 pb-3 md:pb-6">
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase tracking-widest leading-none">獲得鑽石獲取</p>
+                                                        <p className="text-[10px] md:text-xs text-slate-600 font-bold">💎 鑽石資產</p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className="font-code text-4xl font-black text-primary flex items-center gap-3 drop-shadow-md">
-                                                            +{conversionValues.diamonds.toLocaleString()} <Gem className="w-6 h-6"/>
+                                                        <span className="font-code text-xl md:text-4xl font-black text-primary flex items-center gap-1.5 md:gap-3 drop-shadow-md">
+                                                            +{conversionValues.diamonds.toLocaleString()} <Gem className="w-4 h-4 md:w-6 md:h-6"/>
                                                         </span>
                                                     </div>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <div className="space-y-1">
-                                                        <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest leading-none">獲得紅利P點</p>
-                                                        <p className="text-xs text-slate-600 font-bold">✨ 紅利資產</p>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase tracking-widest leading-none">獲得紅利P點</p>
+                                                        <p className="text-[10px] md:text-xs text-slate-600 font-bold">✨ 紅利資產</p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className="font-code text-4xl font-black text-accent flex items-center gap-3 drop-shadow-md">
-                                                            +{conversionValues.pPoints.toLocaleString()} <PPlusIcon className="w-6 h-6"/>
+                                                        <span className="font-code text-xl md:text-4xl font-black text-accent flex items-center gap-1.5 md:gap-3 drop-shadow-md">
+                                                            +{conversionValues.pPoints.toLocaleString()} <PPlusIcon className="w-4 h-4 md:w-6 md:h-6"/>
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="p-6 rounded-[2rem] bg-rose-500/5 border border-rose-500/20 flex items-start gap-4">
-                                                <div className="p-3 bg-rose-500/10 rounded-2xl">
-                                                    <Info className="w-5 h-5 text-rose-500" />
+                                            <div className="p-3 md:p-6 rounded-2xl md:rounded-[2rem] bg-rose-500/5 border border-rose-500/20 flex items-start gap-2 md:gap-4">
+                                                <div className="p-2 md:p-3 bg-rose-500/10 rounded-xl md:rounded-2xl">
+                                                    <Info className="w-4 h-4 md:w-5 md:h-5 text-rose-500" />
                                                 </div>
-                                                <p className="text-[11px] font-bold text-rose-200/60 leading-relaxed">
+                                                <p className="text-[9px] md:text-[11px] font-bold text-rose-200/60 leading-relaxed">
                                                     警告：快速轉點完成後，所選的 {selectedCardIds.size} 張卡片將立即從您的收藏中永久移除並銷毀，相關權益將無法恢復。
                                                 </p>
                                             </div>
                                         </div>
-                                        <AlertDialogFooter className="gap-4">
-                                            <AlertDialogCancel className="h-16 rounded-[2rem] font-bold bg-white/5 border-white/5 text-white hover:bg-white/10 px-8">放棄轉點</AlertDialogCancel>
-                                            <AlertDialogAction onClick={handleQuickSell} disabled={isProcessing} className="h-16 rounded-[2rem] font-black bg-rose-600 text-white hover:bg-rose-700 shadow-[0_0_30px_rgba(225,29,72,0.3)] px-12 border-none">
+                                        <AlertDialogFooter className="gap-2 md:gap-4">
+                                            <AlertDialogCancel className="h-10 md:h-16 rounded-xl md:rounded-[2rem] font-bold bg-white/5 border-white/5 text-white hover:bg-white/10 px-4 md:px-8 text-sm">放棄轉點</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleQuickSell} disabled={isProcessing} className="h-10 md:h-16 rounded-xl md:rounded-[2rem] font-black bg-rose-600 text-white hover:bg-rose-700 shadow-[0_0_30px_rgba(225,29,72,0.3)] px-6 md:px-12 border-none text-sm">
                                                 確認資產變現
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -578,12 +603,31 @@ export default function CollectionPage() {
                   {isAllSelected ? 'Deselect All' : 'Select All'}
               </Button>
               <Separator orientation="vertical" className="h-4 bg-white/10" />
-              <Button variant="ghost" size="sm" className="rounded-xl hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest">
-                  <Filter className="mr-2 h-4 w-4" /> Filter
-              </Button>
-              <Button variant="ghost" size="sm" className="rounded-xl hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest">
-                  <ArrowUpDown className="mr-2 h-4 w-4" /> Sort
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="rounded-xl hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest">
+                        <Filter className="mr-2 h-4 w-4" /> {filterCategory || 'All'}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-slate-900 border-white/10 text-white">
+                    <DropdownMenuItem onClick={() => setFilterCategory(null)}>All</DropdownMenuItem>
+                    {Array.from(new Set(mergedCards.map(c => c.category))).filter(c => c).map(cat => (
+                        <DropdownMenuItem key={cat} onClick={() => setFilterCategory(cat)}>{cat}</DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="rounded-xl hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest">
+                        <ArrowUpDown className="mr-2 h-4 w-4" /> Sort: {sortOption}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-slate-900 border-white/10 text-white">
+                    <DropdownMenuItem onClick={() => setSortOption('latest')}>Latest</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortOption('price')}>Price (High)</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setSortOption('unsold')}>Unsold First</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
           </div>
         </div>
 
@@ -631,6 +675,9 @@ export default function CollectionPage() {
                                 rarity={card.rarity} 
                                 priority={index < 12} 
                             />
+                            <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
+                                {card.sellPrice ? `${card.sellPrice}💎` : 'N/A'}
+                            </div>
                             
                             {/* Selection Overlay */}
                             <div 
@@ -706,6 +753,10 @@ export default function CollectionPage() {
                                 priority={index < 12} 
                             />
                             
+                            <div className="absolute top-3 left-16 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
+                                {card.sellPrice ? `${card.sellPrice}💎` : 'N/A'}
+                            </div>
+
                             <div className="absolute top-3 right-3 z-30">
                                 <Badge className="bg-orange-500 text-black text-[9px] px-2 py-0.5 font-bold italic tracking-tighter shadow-lg border-none animate-pulse">BREAK</Badge>
                             </div>
@@ -766,15 +817,17 @@ export default function CollectionPage() {
         <DialogContent className="max-w-[min(95vw,500px)] bg-slate-950/40 backdrop-blur-3xl border-white/10 shadow-none p-0 overflow-visible flex flex-col items-center justify-center gap-8 rounded-[3rem]">
             <DialogTitle><VisuallyHiddenPrimitive.Root>Card Showroom</VisuallyHiddenPrimitive.Root></DialogTitle>
             {previewCard && (
-                <div className="w-full h-full p-8 md:p-12 flex flex-col items-center gap-10">
-                    <div className="flex flex-col items-center text-center gap-3">
-                        <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1 font-black italic tracking-[0.2em] uppercase text-[10px] mb-2 rounded-full">
-                            {previewCard.rarity} ASSET
+                <div className="w-full h-full p-4 md:p-12 flex flex-col items-center gap-4 md:gap-10">
+                    <div className="flex flex-col items-center text-center gap-1 md:gap-3">
+                        <Badge variant="outline" className="border-primary/30 text-primary bg-primary/5 px-4 py-1 font-black italic tracking-[0.2em] uppercase text-[10px] mb-1 md:mb-2 rounded-full">
+                            {console.log('PREVIEW_CARD_DEBUG:', previewCard)}
+                            {previewCard.category ? previewCard.category.toUpperCase() : 'GENERAL ASSET'}
+                            {previewCard.teamName ? ` | ${previewCard.teamName.toUpperCase()}` : ''}
                         </Badge>
-                        <h2 className="text-2xl md:text-3xl font-black italic tracking-tighter text-white uppercase drop-shadow-2xl">{previewCard.name}</h2>
+                        <h2 className="text-xl md:text-3xl font-black italic tracking-tighter text-white uppercase drop-shadow-2xl">{previewCard.name}</h2>
                     </div>
 
-                    <div className="w-full max-w-[280px] perspective-1000">
+                    <div className="w-full max-w-[200px] md:max-w-[280px] perspective-1000">
                         <motion.div 
                             initial={{ rotateX: 20, y: 20, opacity: 0 }}
                             animate={{ rotateX: 0, y: 0, opacity: 1 }}
@@ -794,9 +847,9 @@ export default function CollectionPage() {
                         </motion.div>
                     </div>
 
-                    <div className="flex flex-col items-center gap-6 w-full">
+                    <div className="flex flex-col items-center gap-4 md:gap-6 w-full">
                         <div className="flex items-center gap-3">
-                             <div className="flex items-center gap-1.5 bg-slate-900 border border-white/10 px-5 py-2.5 rounded-2xl text-xs font-code font-black text-white shadow-xl tracking-widest uppercase">
+                             <div className="flex items-center gap-1.5 bg-slate-900 border border-white/10 px-4 py-2 md:px-5 md:py-2.5 rounded-2xl text-[10px] md:text-xs font-code font-black text-white shadow-xl tracking-widest uppercase">
                                 <Hash className="w-3.5 h-3.5 text-primary" />
                                 {previewCard.serialNumber}
                             </div>

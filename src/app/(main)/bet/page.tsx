@@ -8,7 +8,7 @@ import { useCollection, useFirestore, useMemoFirebase, useUser, useDoc } from '@
 import { collection, query, getDocs, orderBy, doc, getDoc, runTransaction, increment, serverTimestamp, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CrossedCardsIcon, PPlusIcon } from '@/components/icons';
-import { Info, Sparkles, Gem, HelpCircle, Gift, ShoppingBag, Loader2, Truck, Check, Package, Settings, ChevronRight, Swords, Target, RefreshCw, ShieldCheck, XCircle } from 'lucide-react';
+import { Info, Sparkles, Gem, HelpCircle, Gift, ShoppingBag, Loader2, Truck, Check, Package, Settings, ChevronRight, Swords, Target, RefreshCw, ShieldCheck, XCircle, Search } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,13 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { UserProfile } from '@/types/user-profile';
@@ -55,6 +62,8 @@ export default function BetLandingPage() {
     const { user } = useUser();
     const [categoriesWithCounts, setCategoriesWithCounts] = useState<CategoryWithCount[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortOption, setSortOption] = useState<'price-high' | 'price-low' | 'latest' | 'unsold'>('latest');
 
     const systemConfigRef = useMemoFirebase(() => firestore ? doc(firestore, 'systemConfig', 'main') : null, [firestore]);
     const { data: systemConfig } = useDoc<SystemConfig>(systemConfigRef);
@@ -78,8 +87,32 @@ export default function BetLandingPage() {
         allBettingItems.forEach(item => {
             item.allCardIds?.forEach(id => cardIdsInBetting.add(id));
         });
-        return allCards.filter(card => cardIdsInBetting.has(card.id));
-    }, [allCards, allBettingItems]);
+        
+        let baseCards = allCards.filter(card => cardIdsInBetting.has(card.id));
+        
+        // Search
+        if (searchTerm.trim()) {
+            baseCards = baseCards.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+
+        // Sorting
+        const soldCardIds = new Set<string>();
+        allBettingItems.forEach(item => {
+            item.soldCardIds?.forEach(id => soldCardIds.add(id));
+        });
+
+        return baseCards.sort((a, b) => {
+            if (sortOption === 'price-high') return (b.sellPrice || 0) - (a.sellPrice || 0);
+            if (sortOption === 'price-low') return (a.sellPrice || 0) - (b.sellPrice || 0);
+            if (sortOption === 'unsold') {
+                const aSold = soldCardIds.has(a.id) || a.isSold;
+                const bSold = soldCardIds.has(b.id) || b.isSold;
+                if (aSold === bSold) return 0;
+                return aSold ? 1 : -1;
+            }
+            return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0); // Default latest (featured first)
+        });
+    }, [allCards, allBettingItems, searchTerm, sortOption]);
 
     useEffect(() => {
         const fetchItemCounts = async () => {
@@ -157,22 +190,23 @@ export default function BetLandingPage() {
                 </div>
             </div>
 
-            {/* 直觀遊戲規則區塊 - 手機版四宮格美化版 */}
+            {/* 直觀遊戲規則區塊 - 科技感強化版 */}
             <div className="max-w-6xl mx-auto mb-12 md:mb-16 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                     {[
-                        { title: '1/10 命中率', desc: '每注固定 10% 機率直接帶走卡片', icon: Target, color: 'text-primary', bg: 'bg-primary/10' },
-                        { title: '雙幣別支付', desc: '支援使用鑽石或紅利 P+ 參與', icon: RefreshCw, color: 'text-accent', bg: 'bg-accent/10' },
-                        { title: '1:10 價值比', desc: '鑽石與 P+ 點比例固定 1:10', icon: Gem, color: 'text-destructive', bg: 'bg-destructive/10' },
-                        { title: '資產即時發放', desc: '中獎後卡片立即存入數位收藏庫', icon: ShieldCheck, color: 'text-green-400', bg: 'bg-green-400/10' },
+                        { title: '1/10 命中率', desc: '每注固定 10% 機率直接帶走卡片', icon: Target, color: 'text-cyan-400', border: 'border-cyan-500/30' },
+                        { title: '雙幣別支付', desc: '支援使用鑽石或紅利 P+ 參與', icon: RefreshCw, color: 'text-fuchsia-400', border: 'border-fuchsia-500/30' },
+                        { title: '1:10 價值比', desc: '鑽石與 P+ 點比例固定 1:10', icon: Gem, color: 'text-amber-400', border: 'border-amber-500/30' },
+                        { title: '資產即時發放', desc: '中獎後卡片立即存入數位收藏庫', icon: ShieldCheck, color: 'text-emerald-400', border: 'border-emerald-500/30' },
                     ].map((item, idx) => (
-                        <div key={idx} className="relative p-4 md:p-8 rounded-2xl md:rounded-[2rem] bg-card/40 backdrop-blur-xl border border-white/10 flex flex-col items-center text-center group hover:border-white/20 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
-                            <div className={cn("p-3 md:p-4 rounded-xl md:rounded-2xl mb-3 md:mb-6 transition-transform duration-500 group-hover:scale-110 shadow-inner", item.bg, item.color)}>
-                                <item.icon className="w-6 h-6 md:w-10 md:h-10" />
+                        <div key={idx} className={cn("relative p-4 md:p-6 rounded-xl bg-slate-950/60 backdrop-blur-md border flex flex-col items-center text-center group hover:bg-slate-900/80 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]", item.border)}>
+                            <div className={cn("absolute -top-px -left-px w-6 h-6 border-t-2 border-l-2", item.color)} />
+                            <div className={cn("absolute -bottom-px -right-px w-6 h-6 border-b-2 border-r-2", item.color)} />
+                            <div className={cn("mb-4 p-3 rounded-full bg-slate-900 border border-white/5", item.color)}>
+                                <item.icon className="w-6 h-6" />
                             </div>
-                            <h4 className="text-xs md:text-xl font-black text-white mb-1 md:mb-3 tracking-tight font-headline">{item.title}</h4>
-                            <p className="text-[10px] md:text-sm text-muted-foreground font-medium leading-relaxed line-clamp-2">{item.desc}</p>
-                            <div className={cn("absolute inset-0 rounded-2xl md:rounded-[2rem] opacity-0 group-hover:opacity-10 transition-opacity bg-gradient-to-br", item.bg)} />
+                            <h4 className="text-xs md:text-sm font-black text-white mb-2 tracking-[0.1em] font-mono uppercase">{item.title}</h4>
+                            <p className="text-[10px] md:text-xs text-slate-400 font-medium leading-relaxed">{item.desc}</p>
                         </div>
                     ))}
                 </div>
@@ -230,16 +264,46 @@ export default function BetLandingPage() {
             </div>
 
             {/* 全部卡片展示區 - 優化版 */}
-            <div className="mb-4 md:mb-6 flex items-center justify-end animate-fade-in-up">
-                <div className="h-px flex-1 mr-4 md:mr-6 bg-gradient-to-l from-primary/30 to-transparent hidden md:block" />
+            <div className="mb-8 flex flex-col md:flex-row items-center justify-between animate-fade-in-up px-4 md:px-8 gap-4">
                 <h2 className="flex items-center text-sm md:text-lg font-bold font-headline text-white tracking-widest uppercase">
                     全部卡片
                     <Package className="w-3 h-3 md:w-5 md:h-5 ml-3 text-primary animate-pulse" />
                 </h2>
+                
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <div className="flex items-center gap-2 flex-1 md:flex-none">
+                         <span className="text-xs text-white/50 whitespace-nowrap">排序:</span>
+                         <Select 
+                            value={sortOption} 
+                            onValueChange={(val) => setSortOption(val as any)}
+                        >
+                            <SelectTrigger className="h-8 bg-card/50 border-destructive/30 rounded-lg font-bold text-white text-xs w-[120px]">
+                                <SelectValue placeholder="排序方式" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-card/95 rounded-xl">
+                                <SelectItem value="latest" className="font-bold py-2 cursor-pointer">最新</SelectItem>
+                                <SelectItem value="price-high" className="font-bold py-2 cursor-pointer">價格高至低</SelectItem>
+                                <SelectItem value="price-low" className="font-bold py-2 cursor-pointer">價格低至高</SelectItem>
+                                <SelectItem value="unsold" className="font-bold py-2 cursor-pointer">尚未售出</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="搜尋獎品名稱..." 
+                            className="pl-9 h-8 bg-background/40 rounded-lg border-white/10 text-xs" 
+                            value={searchTerm} 
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
             </div>
+            
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-7xl mx-auto">
                 {!allBettingItems && Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="aspect-[2.5/4] rounded-[1.5rem]" />)}
-                {cardsInBetting?.slice(0, 12).map((card) => {
+                {cardsInBetting?.map((card) => {
                     const isSold = card.isSold;
                     return (
                         <BettingGameDialog key={card.id} card={{...card, category: 'all'}} categoryName={encodeURIComponent('all')} disabled={isSold}>
@@ -248,6 +312,9 @@ export default function BetLandingPage() {
                                 isSold && "grayscale opacity-40 cursor-not-allowed"
                             )}>
                                 <SafeImage src={card.imageUrl} alt={card.name} fill className="object-cover" sizes="(max-width: 768px) 50vw, 16vw" />
+                                <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
+                                    {card.sellPrice ? `${card.sellPrice}💎` : 'N/A'}
+                                </div>
                                 {isSold && (
                                     <div className="absolute inset-0 flex items-center justify-center p-2 z-10">
                                         <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />

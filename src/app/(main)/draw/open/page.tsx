@@ -451,7 +451,7 @@ export default function OpenPackPage() {
     const canDraw3 = !isLoadingStats && (!cardPool?.dailyLimit || cardPool.dailyLimit === 0 || (todayDrawCount + 3 <= cardPool.dailyLimit));
 
     return (
-        <div className="flex flex-col items-center h-screen p-2 pt-2 relative overflow-hidden select-none touch-none justify-start md:justify-center" style={{ backgroundImage: 'url("/draw-background.png.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="flex flex-col items-center h-screen p-2 pt-2 relative overflow-hidden select-none touch-none justify-start md:justify-center" style={{ backgroundImage: 'url("/draw-background.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
             <CelebrationVFX type={landingVFX !== 'none' ? landingVFX : showCelebration} />
             <Button variant="ghost" onClick={() => router.back()} className="absolute top-2 left-2 font-bold text-white/40 z-50 text-xs"><ArrowLeft className="mr-1 h-3 w-3" /> 返回</Button>

@@ -204,6 +204,7 @@ export default function BetCategoryPage() {
     const categoryName = params.categoryName as string;
     console.log('categoryName:', categoryName);
     const [searchTerm, setSearchTerm] = useState('');
+    const [sortOption, setSortOption] = useState<'price-high' | 'price-low' | 'latest' | 'unsold'>('latest');
     const [previewCard, setPreviewCard] = useState<CardData | null>(null);
     
     const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'bettingCategories') : null, [firestore]);
@@ -216,17 +217,31 @@ export default function BetCategoryPage() {
     const allCardsCollectionRef = useMemoFirebase(() => firestore ? collection(firestore, 'allCards') : null, [firestore]);
     const { data: allCards, isLoading: isLoading} = useCollection<CardData>(allCardsCollectionRef);
     
+    const soldCardIds = useMemo(() => new Set(bettingItems?.soldCardIds || []), [bettingItems]);
+
     const filteredCards = useMemo(() => {
         if (!allCards || !bettingItems?.allCardIds) return [];
         const cardIdSet = new Set(bettingItems.allCardIds);
-        const baseCards = allCards.filter(c => cardIdSet.has(c.id));
+        let baseCards = allCards.filter(c => cardIdSet.has(c.id));
         
-        // Sort by isFeatured (featured first)
-        const sortedCards = baseCards.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+        // Search
+        if (searchTerm.trim()) {
+            baseCards = baseCards.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
         
-        if (!searchTerm.trim()) return sortedCards;
-        return sortedCards.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    }, [allCards, bettingItems, searchTerm]);
+        // Sorting
+        return baseCards.sort((a, b) => {
+            if (sortOption === 'price-high') return (b.sellPrice || 0) - (a.sellPrice || 0);
+            if (sortOption === 'price-low') return (a.sellPrice || 0) - (b.sellPrice || 0);
+            if (sortOption === 'unsold') {
+                const aSold = soldCardIds.has(a.id) || a.isSold;
+                const bSold = soldCardIds.has(b.id) || b.isSold;
+                if (aSold === bSold) return 0;
+                return aSold ? 1 : -1;
+            }
+            return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0); // Default latest (featured first)
+        });
+    }, [allCards, bettingItems, searchTerm, sortOption, soldCardIds]);
     
     const soldCardIds = useMemo(() => new Set(bettingItems?.soldCardIds || []), [bettingItems]);
 
@@ -269,18 +284,39 @@ export default function BetCategoryPage() {
                 </Dialog>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-                <Select value={decodeURIComponent(categoryName)} onValueChange={(val) => router.push(`/bet/${encodeURIComponent(val)}`)}>
-                    <SelectTrigger className="h-12 bg-card/50 border-destructive/30 rounded-2xl font-black text-white"><SelectValue placeholder="選擇主題分類" /></SelectTrigger>
-                    <SelectContent className="bg-card/95 rounded-2xl">{categories?.map(cat => <SelectItem key={cat.id} value={cat.id!} className="font-bold py-3 rounded-xl">{cat.name}</SelectItem>)}</SelectContent>
-                </Select>
-                <div className="relative w-full lg:w-72"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="搜尋獎品名稱..." className="pl-10 h-12 bg-background/40 rounded-xl" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}/></div>
-            </div>
-            <div className="mb-8 flex items-center justify-between animate-fade-in-up">
-                <h2 className="flex items-center text-lg font-bold font-headline text-white tracking-widest text-left">
-                    <span className="flex items-center"><Disc3 className="w-5 h-5 mr-3 text-primary animate-spin-slow shrink-0" />全部卡片</span>
+            <div className="mb-4 flex items-center justify-between animate-fade-in-up px-4 md:px-8">
+                <h2 className="flex items-center text-sm md:text-lg font-bold font-headline text-white tracking-widest text-left">
+                    <span className="flex items-center"><Disc3 className="w-4 h-4 md:w-5 md:h-5 mr-3 text-primary animate-spin-slow shrink-0" />全部卡片</span>
                 </h2>
-                <div className="h-px flex-1 mx-6 bg-gradient-to-r from-primary/30 to-transparent hidden sm:block" />
+                <div className="flex items-center gap-2">
+                     <span className="text-xs text-white/50">排序:</span>
+                     <Select 
+                        value={sortOption} 
+                        onValueChange={(val) => setSortOption(val as any)}
+                    >
+                        <SelectTrigger className="h-8 bg-card/50 border-destructive/30 rounded-lg font-bold text-white text-xs w-[120px]">
+                            <SelectValue placeholder="排序方式" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card/95 rounded-xl">
+                            <SelectItem value="latest" className="font-bold py-2 cursor-pointer">最新</SelectItem>
+                            <SelectItem value="price-high" className="font-bold py-2 cursor-pointer">價格高至低</SelectItem>
+                            <SelectItem value="price-low" className="font-bold py-2 cursor-pointer">價格低至高</SelectItem>
+                            <SelectItem value="unsold" className="font-bold py-2 cursor-pointer">尚未售出</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            
+            <div className="px-4 md:px-8 mb-4">
+                <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        placeholder="搜尋獎品名稱..." 
+                        className="pl-10 h-12 bg-background/40 rounded-xl border-white/10" 
+                        value={searchTerm} 
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {isLoading ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="aspect-[2.5/4] rounded-[2rem]" />) : 
@@ -297,6 +333,9 @@ export default function BetCategoryPage() {
                             )}
                             <div className="relative flex-1 bg-black/90 rounded-[1rem] border-[6px] border-slate-950 overflow-hidden p-4 group-hover:border-primary/20 transition-colors">
                                 <div className={cn("w-full aspect-[2.5/4] relative cursor-zoom-in transition-all duration-500", isSold && "grayscale opacity-20 scale-95")} onClick={() => !isSold && setPreviewCard(card)}>
+                                    <div className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
+                                        {card.sellPrice ? `${card.sellPrice}💎` : 'N/A'}
+                                    </div>
                                     <Image src={card.imageUrl} alt={card.name} fill className="object-contain" sizes="(max-width: 768px) 50vw, 25vw" />
                                 </div>
                                 {isSold && (

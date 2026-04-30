@@ -54,6 +54,7 @@ export default function DrawCategoryPage() {
     const { data: userProfile } = useDoc<any>(useMemoFirebase(() => (user?.uid ? doc(firestore, 'users', user.uid) : null), [user?.uid, firestore]));
     
     const [searchTerm, setSearchTerm] = useState('');
+    const [sortOption, setSortOption] = useState<'price-high' | 'price-low' | 'latest'>('latest');
 
     // 獲取當前分類詳細資訊
     const categoryRef = useMemoFirebase(() => firestore && categoryId ? doc(firestore, 'drawCategories', decodeURIComponent(categoryId)) : null, [firestore, categoryId]);
@@ -94,8 +95,13 @@ export default function DrawCategoryPage() {
             pools = pools.filter(p => p.name.toLowerCase().includes(term));
         }
         
-        return pools.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-    }, [rawPools, searchTerm]);
+        // Apply sorting
+        if (sortOption === 'price-high') pools.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+        else if (sortOption === 'price-low') pools.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+        else pools.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        
+        return pools;
+    }, [rawPools, searchTerm, sortOption]);
 
     const isLoading = isLoadingPools || isLoadingCategory;
 
@@ -179,14 +185,31 @@ export default function DrawCategoryPage() {
                     </div>
                 </div>
 
-                <div className="relative w-full lg:w-80">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
-                    <Input 
-                        placeholder="搜尋此分類下的卡池..." 
-                        className="pl-12 h-12 bg-background/40 backdrop-blur-sm text-sm border-white/10 rounded-2xl focus:border-primary transition-all" 
-                        value={searchTerm} 
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+                <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+                    <div className="relative w-full lg:w-48">
+                        <Select 
+                            value={sortOption} 
+                            onValueChange={(val) => setSortOption(val as any)}
+                        >
+                            <SelectTrigger className="h-12 bg-background/40 backdrop-blur-sm border-white/10 rounded-2xl font-black uppercase tracking-widest text-white">
+                                <SelectValue placeholder="排序方式" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-card/95 backdrop-blur-3xl border-primary/20 rounded-2xl shadow-2xl">
+                                <SelectItem value="latest" className="font-bold cursor-pointer">最新</SelectItem>
+                                <SelectItem value="price-high" className="font-bold cursor-pointer">價格高至低</SelectItem>
+                                <SelectItem value="price-low" className="font-bold cursor-pointer">價格低至高</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="relative w-full lg:w-80">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground opacity-50" />
+                        <Input 
+                            placeholder="搜尋此分類下的卡池..." 
+                            className="pl-12 h-12 bg-background/40 backdrop-blur-sm text-sm border-white/10 rounded-2xl focus:border-primary transition-all" 
+                            value={searchTerm} 
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
 

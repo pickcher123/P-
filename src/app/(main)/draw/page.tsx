@@ -103,16 +103,25 @@ export default function DrawPage() {
       }
   }, [categories, cardPools]);
 
+  const [sortOption, setSortOption] = useState<'price-high' | 'price-low' | 'latest'>('latest');
+
   const allPools = useMemo(() => {
     if (!cardPools || cardPools.length === 0) return [];
     const now = Math.floor(Date.now() / 1000);
-    return cardPools.filter(p => 
+    const pools = cardPools.filter(p => 
         (p.remainingPacks ?? 0) > 0 && 
         (!p.expiresAt || p.expiresAt.seconds > now) &&
         (!p.startsAt || p.startsAt.seconds < now) &&
         (p.isActive !== false)
-    ).sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-  }, [cardPools]);
+    );
+    
+    // Explicit sorting logic based on sortOption
+    return pools.sort((a, b) => {
+        if (sortOption === 'price-high') return (b.price ?? 0) - (a.price ?? 0);
+        if (sortOption === 'price-low') return (a.price ?? 0) - (b.price ?? 0);
+        return 0; // Default or latest
+    });
+  }, [cardPools, sortOption]);
 
   const finalIsLoading = isLoadingCategories || isLoadingPools || isLoading;
 
@@ -239,8 +248,17 @@ export default function DrawPage() {
 
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4 md:p-12 text-center">
                         <div className="transform transition-transform duration-500 group-hover:translate-y-[-5px] w-full px-2">
-                            <h3 className="font-headline text-base lg:text-2xl xl:text-4xl font-black text-white tracking-tighter drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] group-hover:text-primary transition-colors truncate">
-                                {category.name}
+                            <h3 className="font-headline text-base lg:text-2xl xl:text-4xl font-black text-white tracking-tighter drop-shadow-[0_2px_15px_rgba(0,0,0,0.8)] group-hover:text-primary transition-colors">
+                                {category.id === 'ifansan-prize' ? (
+                                    <>
+                                        球卡一番賞
+                                        <span className="block text-xs lg:text-base xl:text-lg font-medium mt-1">
+                                            (500元/抽 以下)
+                                        </span>
+                                    </>
+                                ) : (
+                                    <span className="truncate block">{category.name}</span>
+                                )}
                             </h3>
                         </div>
                     </div>
@@ -255,7 +273,18 @@ export default function DrawPage() {
                         <Trophy className="w-5 h-5 md:w-6 md:h-6 mr-3 text-accent animate-bounce shrink-0" />
                         全部卡池
                     </h2>
-                    <div className="h-px flex-1 mx-4 md:mx-6 bg-gradient-to-r from-accent/30 to-transparent hidden sm:block" />
+                    <div className="flex items-center gap-2">
+                         <span className="text-xs text-white/50">排序:</span>
+                         <select 
+                            className="bg-card text-xs p-1 rounded border border-white/10"
+                            value={sortOption}
+                            onChange={(e) => setSortOption(e.target.value as any)}
+                         >
+                             <option value="latest">最新</option>
+                             <option value="price-high">價格高至低</option>
+                             <option value="price-low">價格低至高</option>
+                         </select>
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                     {allPools.map((pool) => (

@@ -181,10 +181,10 @@ export function BettingGameDialog({ card, children, categoryName, onSpinStart, o
                 </VisuallyHidden>
                 <div className="grid grid-cols-2 h-full">
                     <div className="p-2 md:p-8 bg-black/40 flex flex-col items-center justify-center border-r border-slate-950 relative overflow-hidden">
-                        <div className={cn("relative w-full rounded-[1rem] border-[4px] border-slate-950 bg-transparent aspect-[2.5/4] p-2", card.isSold && "opacity-30 grayscale")}>
+                        <div className={cn("relative w-full rounded-[1rem] border-[4px] border-slate-950 bg-transparent aspect-[2.5/4] p-2", card.isSold && !isProcessing && "opacity-30 grayscale")}>
                             <CardItem name={card.name} imageUrl={card.imageUrl} backImageUrl={card.backImageUrl} imageHint={card.imageHint} isFlippable={!card.isSold} rarity="legendary" />
                         </div>
-                        {card.isSold && (
+                        {card.isSold && !isProcessing && (
                             <div className="absolute inset-0 flex items-center justify-center z-20">
                                 <div className="p-4 rounded-3xl bg-destructive/20 border border-destructive/40 backdrop-blur-md shadow-[0_0_20px_rgba(239,68,68,0.3)]">
                                     <p className="text-xl font-black text-white italic tracking-tighter uppercase rotate-[-5deg]">OUT OF STOCK</p>
