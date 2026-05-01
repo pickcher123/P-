@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { CardItem } from '@/components/card-item';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import {
   Dialog,
   DialogContent,
@@ -451,20 +452,12 @@ export default function OpenPackPage() {
     const canDraw3 = !isLoadingStats && (!cardPool?.dailyLimit || cardPool.dailyLimit === 0 || (todayDrawCount + 3 <= cardPool.dailyLimit));
 
     return (
-        <div className="flex flex-col items-center h-screen p-2 pt-2 relative overflow-hidden select-none touch-none justify-start md:justify-center">
-            <SafeImage
-                src="/draw-background.png"
-                alt="Background"
-                fill
-                className="object-cover z-0"
-                priority
-                referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10" />
+        <div className="flex flex-col items-center h-screen p-2 pt-2 relative overflow-hidden select-none touch-none justify-start md:justify-center" style={{ backgroundImage: 'url("/draw-background.png")', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-[5]" />
             <CelebrationVFX type={landingVFX !== 'none' ? landingVFX : showCelebration} />
-            <Button variant="ghost" onClick={() => router.back()} className="absolute top-2 left-2 font-bold text-white/40 z-50 text-xs"><ArrowLeft className="mr-1 h-3 w-3" /> 返回</Button>
+            <Button variant="ghost" onClick={() => router.back()} className="absolute top-2 left-2 font-bold text-white/40 z-[20] text-xs"><ArrowLeft className="mr-1 h-3 w-3" /> 返回</Button>
             
-            <div className="w-full flex flex-col items-center justify-end pb-1 min-h-[40px] z-10 select-none mt-2 md:mt-0">
+            <div className="w-full flex flex-col items-center justify-end pb-1 min-h-[40px] z-[15] select-none mt-2 md:mt-0">
                 {step !== 'done' && step !== 'waiting-to-start' && step !== 'init-loading' && (
                     <div className="flex justify-center mb-1">
                         <div className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[8px] font-black uppercase shadow-xl backdrop-blur-md">
@@ -497,7 +490,7 @@ export default function OpenPackPage() {
             </div>
 
             {step !== 'done' ? (
-                <div className="flex flex-col items-center justify-center pt-2 w-full relative transition-all duration-500 select-none">
+                <div className="flex flex-col items-center justify-center pt-2 w-full relative transition-all duration-500 select-none z-[20]">
                     <motion.div 
                         initial={{ y: -800, opacity: 0, scale: 0.2, rotate: -45, filter: 'blur(50px)' }}
                         animate={{ y: 0, opacity: 1, scale: 1, rotate: 0, filter: 'blur(0px)' }}
