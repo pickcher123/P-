@@ -426,29 +426,32 @@ export default function CollectionPage() {
                                         </AlertDialogHeader>
                                         <div className="space-y-2 md:space-y-8 my-2 md:my-8 relative z-10">
                                             <RadioGroup defaultValue="7-11" onValueChange={(value: ShippingMethod) => setShippingMethod(value)} className="grid grid-cols-3 gap-1 md:gap-4">
-                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-1.5 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '7-11' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
+                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-3 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '7-11' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}
+                                                     onClick={() => setShippingMethod('7-11')}>
                                                     <div className="flex justify-between items-center">
-                                                        <RadioGroupItem value="7-11" id="r1" className="border-white/20 text-primary scale-50" />
-                                                        <Package className="w-2.5 h-2.5 md:w-4 md:h-4 text-primary/40" />
+                                                        <RadioGroupItem value="7-11" id="r1" className="border-white/20 text-primary" />
+                                                        <Package className="w-4 h-4 md:w-6 md:h-6 text-primary/40" />
                                                     </div>
-                                                    <Label htmlFor="r1" className="cursor-pointer font-black text-[8px] md:text-sm text-white mt-0.5">7-11</Label>
-                                                    <p className="text-[7px] md:text-[10px] text-slate-500 font-bold uppercase truncate">{hasFreeShipping ? '運 0' : `${SHIPPING_FEE}`}</p>
+                                                    <Label htmlFor="r1" className="cursor-pointer font-black text-[10px] md:text-md text-white mt-0.5">7-11</Label>
+                                                    <p className="text-[8px] md:text-[12px] text-slate-500 font-bold uppercase truncate">{hasFreeShipping ? '運 0' : `${SHIPPING_FEE}`}</p>
                                                 </div>
-                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-1.5 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '郵寄' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
+                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-3 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '郵寄' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}
+                                                     onClick={() => setShippingMethod('郵寄')}>
                                                     <div className="flex justify-between items-center">
-                                                        <RadioGroupItem value="郵寄" id="r2" className="border-white/20 text-primary scale-50" />
-                                                        <MapPin className="w-2.5 h-2.5 md:w-4 md:h-4 text-primary/40" />
+                                                        <RadioGroupItem value="郵寄" id="r2" className="border-white/20 text-primary" />
+                                                        <MapPin className="w-4 h-4 md:w-6 md:h-6 text-primary/40" />
                                                     </div>
-                                                    <Label htmlFor="r2" className="cursor-pointer font-black text-[8px] md:text-sm text-white mt-0.5">郵寄</Label>
-                                                    <p className="text-[7px] md:text-[10px] text-slate-500 font-bold uppercase truncate">{hasFreeShipping ? '運 0' : `${SHIPPING_FEE}`}</p>
+                                                    <Label htmlFor="r2" className="cursor-pointer font-black text-[10px] md:text-md text-white mt-0.5">郵寄</Label>
+                                                    <p className="text-[8px] md:text-[12px] text-slate-500 font-bold uppercase truncate">{hasFreeShipping ? '運 0' : `${SHIPPING_FEE}`}</p>
                                                 </div>
-                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-1.5 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '面交自取' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}>
+                                                <div className={cn("flex flex-col gap-0.5 md:gap-2 border p-3 md:p-5 rounded-xl md:rounded-3xl transition-all cursor-pointer", shippingMethod === '面交自取' ? 'bg-primary/5 border-primary/40 ring-1 ring-primary/40' : 'bg-slate-900 border-white/5 hover:bg-slate-800')}
+                                                     onClick={() => setShippingMethod('面交自取')}>
                                                     <div className="flex justify-between items-center">
-                                                        <RadioGroupItem value="面交自取" id="r3" className="border-white/20 text-primary scale-50" />
-                                                        <Users className="w-2.5 h-2.5 md:w-4 md:h-4 text-primary/40" />
+                                                        <RadioGroupItem value="面交自取" id="r3" className="border-white/20 text-primary" />
+                                                        <Users className="w-4 h-4 md:w-6 md:h-6 text-primary/40" />
                                                     </div>
-                                                    <Label htmlFor="r3" className="cursor-pointer font-black text-[8px] md:text-sm text-white mt-0.5">自取</Label>
-                                                    <p className="text-[7px] md:text-[10px] text-slate-500 font-bold uppercase truncate">NO FEE</p>
+                                                    <Label htmlFor="r3" className="cursor-pointer font-black text-[10px] md:text-md text-white mt-0.5">自取</Label>
+                                                    <p className="text-[8px] md:text-[12px] text-slate-500 font-bold uppercase truncate">NO FEE</p>
                                                 </div>
                                             </RadioGroup>
                                             
@@ -675,9 +678,9 @@ export default function CollectionPage() {
                                 rarity={card.rarity} 
                                 priority={index < 12} 
                             />
-                            <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
+                            {/* <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
                                 {card.sellPrice ? `${card.sellPrice}💎` : 'N/A'}
-                            </div>
+                            </div> */}
                             
                             {/* Selection Overlay */}
                             <div 
@@ -753,9 +756,9 @@ export default function CollectionPage() {
                                 priority={index < 12} 
                             />
                             
-                            <div className="absolute top-3 left-16 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
+                            {/* <div className="absolute top-3 left-16 bg-slate-900/80 backdrop-blur-md text-[9px] font-black tracking-widest text-primary px-2 py-0.5 rounded-lg border border-primary/20 pointer-events-none z-20">
                                 {card.sellPrice ? `${card.sellPrice}💎` : 'N/A'}
-                            </div>
+                            </div> */}
 
                             <div className="absolute top-3 right-3 z-30">
                                 <Badge className="bg-orange-500 text-black text-[9px] px-2 py-0.5 font-bold italic tracking-tighter shadow-lg border-none animate-pulse">BREAK</Badge>
@@ -867,14 +870,6 @@ export default function CollectionPage() {
                 </div>
             )}
             
-            <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute -top-16 md:-top-20 right-0 md:-right-12 rounded-full bg-slate-900/80 backdrop-blur-md text-white border border-white/10 h-10 w-10 md:h-12 md:w-12 hover:bg-white/10 transition-all flex items-center justify-center p-0"
-                onClick={() => setPreviewCard(null)}
-            >
-                <X className="h-6 w-6" />
-            </Button>
         </DialogContent>
       </Dialog>
     </div>
