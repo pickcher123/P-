@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   icons: {
-    icon: "/icon/192x192.png",
+    icon: "/192x192.png",
   },
   manifest: '/manifest.json',
 };
