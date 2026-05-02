@@ -1,17 +1,7 @@
 'use client';
 
-import { Crown, Sparkles, Star, Trophy } from 'lucide-react';
+import { Crown, Gem, Sparkles, Star, Trophy } from 'lucide-react';
 import { cn } from "@/lib/utils";
-
-/**
- * 自定義兩張卡牌交疊圖示 (用於卡牌大師)
- */
-const TwoCardsIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect x="2" y="6" width="11" height="15" rx="2" transform="rotate(-12 7.5 13.5)" />
-    <rect x="11" y="3" width="11" height="15" rx="2" transform="rotate(12 16.5 10.5)" />
-  </svg>
-);
 
 /**
  * 全站統一的 7 個等級樣式定義
@@ -52,7 +42,7 @@ export const userLevels = [
         glow: 'shadow-[0_0_30px_rgba(234,179,8,0.4)]', 
         bg: 'bg-yellow-500/15', 
         animate: 'animate-pulse',
-        icon: TwoCardsIcon
+        icon: Gem
     },
     { 
         level: '殿堂級玩家', 

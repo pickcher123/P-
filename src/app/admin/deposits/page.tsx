@@ -22,6 +22,7 @@ interface Transaction {
     section?: string;
     currency?: 'diamond' | 'p-point';
     details?: string;
+    status: 'pending' | 'completed' | 'failed';
 }
 
 export default function DepositsAdminPage() {
@@ -49,7 +50,9 @@ export default function DepositsAdminPage() {
 
   const sortedDeposits = useMemo(() => {
     if (!deposits) return [];
-    let filtered = [...deposits];
+    // Only show completed transactions
+    let filtered = deposits.filter(tx => tx.status === 'completed');
+    
     if (filter === 'deposit') {
       filtered = filtered.filter(tx => tx.section === 'deposit');
     } else if (filter === 'admin') {

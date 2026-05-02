@@ -593,23 +593,23 @@ export default function CollectionPage() {
         </AnimatePresence>
 
         {/* Filters & Sorting Placeholder (UI Only) */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6 relative z-10 px-4">
-          <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 text-slate-400">
-                  <LayoutGrid className="w-4 h-4" />
-                  <span className="text-xs font-black uppercase tracking-widest">Total Assets: {mergedCards.length}</span>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-2 relative z-10 px-2 lg:px-4 text-[10px] sm:text-[11px]">
+          <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-slate-400">
+                  <LayoutGrid className="w-3 h-3" />
+                  <span className="font-black uppercase tracking-widest">Total Assets: {mergedCards.length}</span>
               </div>
           </div>
-          <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={handleSelectAll} disabled={mergedCards.length === 0} className="rounded-xl hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest">
-                  <CheckSquare className="mr-2 h-4 w-4 text-primary" /> 
-                  {isAllSelected ? 'Deselect All' : 'Select All'}
+          <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={handleSelectAll} disabled={mergedCards.length === 0} className="rounded-lg hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest px-2 h-8">
+                  <CheckSquare className="mr-1 h-3.5 w-3.5 text-primary" /> 
+                  {isAllSelected ? 'Deselect' : 'Select'}
               </Button>
               <Separator orientation="vertical" className="h-4 bg-white/10" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="rounded-xl hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest">
-                        <Filter className="mr-2 h-4 w-4" /> {filterCategory || 'All'}
+                    <Button variant="ghost" size="sm" className="rounded-lg hover:bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest px-2 h-8">
+                        <Filter className="mr-1 h-3.5 w-3.5" /> {filterCategory || 'All'}
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-slate-900 border-white/10 text-white">

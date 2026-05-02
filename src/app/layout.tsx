@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='black'/><text x='16' y='22' text-anchor='middle' fill='%2306B6D4' font-size='18' font-family='sans-serif' font-weight='900'>P%2B</text></svg>",
+    icon: "/icon/192x192.png",
   },
   manifest: '/manifest.json',
 };

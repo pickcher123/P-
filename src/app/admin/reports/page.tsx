@@ -20,6 +20,7 @@ interface Transaction {
     transactionType: string;
     section?: string;
     currency?: 'diamond' | 'p-point';
+    status: 'pending' | 'completed' | 'failed';
 }
 
 const years = Array.from({ length: 5 }, (_, i) => getYear(new Date()) - i);
@@ -68,7 +69,7 @@ export default function ReportsPage() {
 
         const activePlayerIds = new Set<string>();
         const stats = filteredTransactions.reduce((acc, tx) => {
-            if (tx.transactionType === 'Deposit' && tx.section === 'deposit') {
+            if (tx.transactionType === 'Deposit' && tx.section === 'deposit' && tx.status === 'completed') {
                 acc.totalIncome += tx.amount;
                 const txDate = new Date(tx.transactionDate.seconds * 1000);
                 dailyIncome[txDate.getDate().toString()] += tx.amount;
