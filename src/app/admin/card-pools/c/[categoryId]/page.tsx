@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, Timestamp, deleteDoc, doc, updateDoc, query, orderBy, where } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +43,7 @@ interface CardPool {
   remainingPacks?: number;
   categoryId?: string;
   order?: number;
+  status?: 'draft' | 'published';
 }
 
 export default function CardPoolsAdminPage() {
@@ -77,6 +80,7 @@ export default function CardPoolsAdminPage() {
         cardRarities: {},
         expiresAt: Timestamp.fromDate(new Date(new Date().setDate(new Date().getDate() + 30))),
         imageUrl: `https://picsum.photos/seed/${Math.random()}/800/600`,
+        status: 'draft',
       };
 
       const docRef = await addDoc(collection(firestore, 'cardPools'), dataToSave);
@@ -99,6 +103,18 @@ export default function CardPoolsAdminPage() {
       toast({ variant: "destructive", title: "錯誤", description: "刪除卡池時發生錯誤。" });
     }
   };
+
+  const handleStatusToggle = async (poolId: string, currentStatus: string = 'draft') => {
+      if(!firestore) return;
+      const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+      try {
+          await updateDoc(doc(firestore, 'cardPools', poolId), { status: newStatus });
+          toast({ title: "狀態已更新", description: `卡池已更新為 ${newStatus === 'published' ? '已上架' : '草稿'}`});
+      } catch (error) {
+          console.error("Error updating status:", error);
+          toast({ variant: "destructive", title: "錯誤", description: "更新狀態時發生錯誤" });
+      }
+  }
 
   const handleOrderChange = useCallback(async (poolId: string, newOrder: number) => {
     if (!firestore) return;
@@ -138,6 +154,7 @@ export default function CardPoolsAdminPage() {
               <TableHead className="pl-6">卡池名稱</TableHead>
               <TableHead>價格 (單抽/三抽)</TableHead>
               <TableHead>存量狀態</TableHead>
+              <TableHead>上架狀態</TableHead>
               <TableHead className="w-24">排序權重</TableHead>
               <TableHead className="text-right pr-6 w-32">操作</TableHead>
             </TableRow>
@@ -181,6 +198,18 @@ export default function CardPoolsAdminPage() {
                     <Badge variant={pool.remainingPacks === 0 ? "destructive" : "secondary"} className={cn("font-code text-xs px-2", pool.remainingPacks! > 0 && "bg-green-500/10 text-green-500 border-green-500/20")}>
                         {pool.remainingPacks} / {pool.totalPacks} PACKS
                     </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center space-x-2">
+                        <Switch 
+                            id={`status-switch-${pool.id}`}
+                            checked={pool.status === 'published'}
+                            onCheckedChange={() => handleStatusToggle(pool.id!, pool.status)}
+                        />
+                        <Label htmlFor={`status-switch-${pool.id}`} className={cn("text-[10px]", pool.status === 'published' ? 'text-green-500' : 'text-muted-foreground')}>
+                            {pool.status === 'published' ? '已上架' : '草稿'}
+                        </Label>
+                    </div>
                 </TableCell>
                 <TableCell>
                     <Input

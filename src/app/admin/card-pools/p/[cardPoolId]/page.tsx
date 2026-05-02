@@ -758,6 +758,23 @@ export default function CardPoolDetailPage() {
                                 />
                             </div>
 
+                            <div className="flex items-center justify-between p-4 bg-rose-50 rounded-xl border border-rose-100 shadow-inner">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base flex items-center gap-2 font-black text-rose-900">
+                                        <Ban className="h-4 w-4 text-rose-500" />
+                                        限制級內容 (18+)
+                                    </Label>
+                                    <p className="text-[10px] text-rose-600/60 font-bold uppercase tracking-widest">Adult Content (18+)</p>
+                                </div>
+                                <Switch
+                                    checked={poolDetails.isAdult || false}
+                                    onCheckedChange={(checked) => {
+                                        setPoolDetails({ ...poolDetails, isAdult: checked });
+                                        handleUpdatePoolDetails('isAdult', checked);
+                                    }}
+                                />
+                            </div>
+
                             <div className="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-100 shadow-inner">
                                 <div className="space-y-0.5">
                                     <Label className="text-base flex items-center gap-2 text-amber-700 font-black">

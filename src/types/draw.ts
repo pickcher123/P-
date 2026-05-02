@@ -37,6 +37,7 @@ export interface CardPool {
     lockedAt?: { seconds: number; nanoseconds: number; };
     dailyLimit?: number;
     minLevel?: string;
+    isAdult?: boolean;
 }
 
 export type DrawnPrize = (Card & { rarity: Rarity; type: 'card' | 'last-prize'; serialNumber?: string }) | (PointPrize & { type: 'points'; rarity: Rarity });

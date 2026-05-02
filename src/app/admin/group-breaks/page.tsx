@@ -73,6 +73,7 @@ export default function GroupBreaksAdminPage() {
     try {
       const dataToSave: any = {
         title: newBreak.title,
+        isAdult: !!newBreak.isAdult,
         status: newBreak.status,
         breakType: newBreak.breakType,
         createdAt: new Date(),
@@ -153,6 +154,14 @@ export default function GroupBreaksAdminPage() {
                     </div>
                 </RadioGroup>
              </div>
+             <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                    id="isAdult"
+                    checked={newBreak.isAdult || false}
+                    onCheckedChange={(checked) => setNewBreak({...newBreak, isAdult: checked})}
+                />
+                <Label htmlFor="isAdult">限制級內容 (18+)</Label>
+            </div>
             {newBreak.breakType === 'spot' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">

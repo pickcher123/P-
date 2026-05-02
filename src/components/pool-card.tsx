@@ -16,6 +16,7 @@ import { SafeImage } from '@/components/safe-image';
 import { format } from 'date-fns';
 import { CardItem } from '@/components/card-item';
 import { userLevels } from '@/components/member-level-crown';
+import { VerifyAgeModal } from '@/components/verify-age-modal';
 
 const RARITIES = ['legendary', 'rare', 'common'] as const;
 type Rarity = typeof RARITIES[number];
@@ -71,6 +72,7 @@ interface CardPool {
   categoryId?: string;
   dailyLimit?: number;
   minLevel?: string;
+  isAdult?: boolean;
 }
 
 const LOCK_DURATION = 120;
@@ -248,9 +250,28 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
     }, [pool, allCardsMap]);
 
     const canDraw3 = !isLoadingStats && (!pool.dailyLimit || pool.dailyLimit === 0 || (todayDrawCount + 3 <= pool.dailyLimit));
+    const [isAgeVerifiedModalOpen, setIsAgeVerifiedModalOpen] = useState(false);
+    const [pendingDraws, setPendingDraws] = useState<number>(0);
+
+    const handleDraw = (draws: number) => {
+        if (pool.isAdult) {
+            setPendingDraws(draws);
+            setIsAgeVerifiedModalOpen(true);
+        } else {
+            router.push(`/draw/open?poolId=${pool.id}&draws=${draws}`);
+        }
+    }
 
     return (
         <Dialog>
+            <VerifyAgeModal 
+                isOpen={isAgeVerifiedModalOpen}
+                onClose={() => setIsAgeVerifiedModalOpen(false)}
+                onConfirm={() => {
+                    setIsAgeVerifiedModalOpen(false);
+                    router.push(`/draw/open?poolId=${pool.id}&draws=${pendingDraws}`);
+                }}
+            />
             <div className="relative flex flex-col p-2 bg-slate-900 border-[8px] border-slate-950 rounded-[2.5rem] shadow-2xl group transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(251,191,36,0.3)] [perspective:1000px]">
                 <div className="relative flex flex-col bg-black/90 rounded-[1.5rem] border-[10px] border-slate-950 overflow-hidden transition-transform duration-500 group-hover:[transform:rotateY(5deg)_rotateX(5deg)]">
                     <div className="relative z-10 flex flex-col p-4 md:p-6 bg-slate-950/40">
@@ -364,7 +385,7 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
                                     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
                                         window.navigator.vibrate(50);
                                     }
-                                    router.push(`/draw/open?poolId=${pool.id}&draws=1`);
+                                    handleDraw(1);
                                 }}
                             >
                                 <span className="flex-1 text-center italic">
@@ -386,7 +407,7 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
                                     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
                                         window.navigator.vibrate([50, 50, 50]);
                                     }
-                                    router.push(`/draw/open?poolId=${pool.id}&draws=${Math.min(3, pool.remainingPacks || 0)}`);
+                                    handleDraw(Math.min(3, pool.remainingPacks || 0));
                                 }}
                             >
                                 <span className="flex-1 text-center italic">

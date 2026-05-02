@@ -60,6 +60,7 @@ interface GroupBreak {
   breakType: 'spot' | 'team';
   currency?: 'diamond' | 'p-point';
   status: 'draft' | 'published' | 'completed';
+  isAdult?: boolean;
   winnings?: Winnings[];
   spots?: Spot[];
   teams?: Team[];
@@ -366,6 +367,7 @@ export default function GroupBreakAdminDetailPage() {
         breakType: groupBreak.breakType,
         teams: groupBreak.teams,
         currency: groupBreak.currency || 'diamond',
+        isAdult: groupBreak.isAdult,
       });
       setPreviewUrl(groupBreak.imageUrl);
     }
@@ -643,6 +645,16 @@ export default function GroupBreakAdminDetailPage() {
                     handleDetailChange('status', newStatus);
                     handleSaveDetails('status');
                 }} disabled={groupBreak.status === 'completed'} />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-rose-50 border rounded-lg">
+                <div className="space-y-0.5">
+                    <Label htmlFor="isAdult" className="font-bold text-rose-900">限制級內容 (18+)</Label>
+                    <p className="text-xs text-rose-600/70">開啟後玩家購買前需進行年齡驗證</p>
+                </div>
+                <Switch id="isAdult" checked={!!details.isAdult} onCheckedChange={(checked) => {
+                    handleDetailChange('isAdult', checked);
+                    handleSaveDetails('isAdult');
+                }} />
               </div>
             </CardContent>
           </Card>

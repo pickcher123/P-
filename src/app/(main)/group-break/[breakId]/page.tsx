@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo, PPlusIcon } from '@/components/icons';
 import { CardItem } from '@/components/card-item';
+import { VerifyAgeModal } from '@/components/verify-age-modal';
 
 
 type Spot = {
@@ -78,6 +79,8 @@ export default function GroupBreakDetailPage() {
   const [selectedSpots, setSelectedSpots] = useState<Set<number>>(new Set());
   const [selectedTeams, setSelectedTeams] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAgeModalOpen, setIsAgeModalOpen] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
   
   const [isRandomPickOpen, setIsRandomPickOpen] = useState(false);
   const [randomPickCount, setRandomPickCount] = useState(1);
@@ -167,6 +170,10 @@ export default function GroupBreakDetailPage() {
   };
 
   const handlePurchase = async () => {
+    if (groupBreak?.isAdult && !isVerified) {
+        setIsAgeModalOpen(true);
+        return;
+    }
     if (!user || !firestore || !groupBreakRef || !groupBreak) return;
     const isTeamBreak = groupBreak.breakType === 'team';
     const hasSelection = isTeamBreak ? selectedTeams.size > 0 : selectedSpots.size > 0;
@@ -537,6 +544,16 @@ export default function GroupBreakDetailPage() {
             </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <VerifyAgeModal 
+          isOpen={isAgeModalOpen}
+          onClose={() => setIsAgeModalOpen(false)}
+          onConfirm={() => {
+              setIsAgeModalOpen(false);
+              setIsVerified(true);
+              handlePurchase();
+          }}
+      />
     </div>
   );
 }
