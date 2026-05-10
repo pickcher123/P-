@@ -55,7 +55,7 @@ export default function CardPoolsAdminPage() {
 
   const cardPoolsCollection = useMemoFirebase(() => {
     if (!firestore || !categoryId) return null;
-    return query(collection(firestore, 'cardPools'), where('categoryId', '==', decodeURIComponent(categoryId)), orderBy('order', 'asc'));
+    return query(collection(firestore, 'cardPools'), where('categoryId', '==', decodeURIComponent(categoryId)));
   }, [firestore, categoryId]);
 
   const { data: cardPools, isLoading: isLoadingPools } = useCollection<CardPool>(cardPoolsCollection);

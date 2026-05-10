@@ -276,30 +276,35 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
                 <div className="relative flex flex-col bg-black/90 rounded-[1.5rem] border-[10px] border-slate-950 overflow-hidden transition-transform duration-500 group-hover:[transform:rotateY(5deg)_rotateX(5deg)]">
                     <div className="relative z-10 flex flex-col p-4 md:p-6 bg-slate-950/40">
                         <div className="text-center mb-4 space-y-2">
-                            <h3 className="text-lg font-headline font-black text-white uppercase truncate">{pool.name}</h3>
+                            <h3 className="text-lg font-headline font-black uppercase truncate bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-primary/80">{pool.name}</h3>
                             <div className="flex items-center justify-center gap-2">
-                                <Badge variant="outline" className="text-[10px] text-primary border-primary/20">{pool.description}</Badge>
+                                <Badge variant="outline" className="text-[10px] text-primary/70 border-primary/20 bg-primary/5">{pool.description}</Badge>
                             </div>
                         </div>
-                        <div className="bg-black/60 border border-white/10 p-3 rounded-2xl mb-4">
+                        <div className="relative bg-slate-950/50 border border-white/5 p-3 rounded-2xl mb-4 shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
                             <div className="flex justify-between items-baseline mb-2">
-                                <span className="text-[9px] font-black text-primary uppercase">即時存量</span>
-                                <div className="font-code text-xl font-black text-white">{pool.remainingPacks} <span className="text-[10px] text-white/30">/ {pool.totalPacks}</span></div>
+                                <span className="text-[9px] font-black text-primary/70 uppercase tracking-wider">庫存餘額</span>
+                                <div className="font-code text-xl font-black text-white">
+                                    {pool.remainingPacks} <span className="text-[10px] text-white/30">/ {pool.totalPacks}</span>
+                                </div>
                             </div>
-                            <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                                <div className="h-full bg-primary transition-all duration-1000 shadow-[0_0_10px_rgba(6,182,212,0.6)]" style={{ width: `${(pool.remainingPacks || 0) / (pool.totalPacks || 1) * 100}%` }} />
+                            <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-white/5">
+                                <div 
+                                    className="h-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-1000 shadow-[0_0_10px_rgba(6,182,212,0.4)]" 
+                                    style={{ width: `${(pool.remainingPacks || 0) / (pool.totalPacks || 1) * 100}%` }} 
+                                />
                             </div>
                         </div>
                         <div className="grid grid-cols-3 gap-2 mb-4">
                             {RARITIES.map(r => (
-                                <div key={r} className={cn("p-2 rounded-2xl border flex flex-col items-center", rarityStyles[r].bg, rarityStyles[r].border)}>
+                                <div key={r} className={cn("p-2 rounded-2xl border flex flex-col items-center transition-all hover:scale-105", rarityStyles[r].bg, rarityStyles[r].border)}>
                                     <span className={cn("text-[7px] font-black uppercase", rarityStyles[r].text)}>{rarityStyles[r].label}</span>
                                     <span className="text-xs font-black font-code text-white">{rarityProbabilities[r].toFixed(1)}%</span>
                                 </div>
                             ))}
                         </div>
                         <DialogTrigger asChild>
-                            <div className="flex-1 bg-slate-900/60 border-2 border-primary/30 rounded-2xl p-4 cursor-pointer flex flex-col shadow-2xl min-h-[140px] transition-transform hover:scale-[1.02]">
+                            <div className="flex-1 bg-slate-950 rounded-2xl p-4 cursor-pointer flex flex-col shadow-[inset_0_0_30px_rgba(0,0,0,0.8),0_0_15px_rgba(6,182,212,0.1)] border border-white/10 min-h-[140px] transition-all hover:scale-[1.02] hover:border-primary/50 hover:shadow-[inset_0_0_20px_rgba(0,0,0,0.5),0_0_20px_rgba(6,182,212,0.3)]">
                                 <div className="flex justify-between items-center mb-3">
                                     <span className="text-[10px] font-black text-primary uppercase flex items-center gap-2"><Trophy className="w-4 h-4" /> 剩餘大獎</span>
                                     {lastPrizeCard && <Badge className="bg-accent text-accent-foreground text-[8px] font-black border-none animate-pulse">最後賞</Badge>}
