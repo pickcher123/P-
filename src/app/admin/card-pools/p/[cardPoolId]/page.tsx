@@ -76,6 +76,7 @@ interface CardPool {
   pointPrizes?: PointPrize[];
   price?: number;
   price3Draws?: number;
+  price10Draws?: number;
   totalPacks?: number;
   remainingPacks?: number;
   hasProtection?: boolean;
@@ -310,6 +311,7 @@ export default function CardPoolDetailPage() {
         description: cardPool.description || '',
         price: cardPool.price || 0,
         price3Draws: cardPool.price3Draws,
+        price10Draws: cardPool.price10Draws,
         totalPacks: cardPool.totalPacks || 0,
         remainingPacks: cardPool.remainingPacks ?? cardPool.totalPacks,
         hasProtection: cardPool.hasProtection !== false,
@@ -852,6 +854,13 @@ export default function CardPoolDetailPage() {
                                         三連抽優惠價
                                     </Label>
                                     <Input id="pool-price-3" type="number" value={poolDetails.price3Draws || ''} placeholder="例如: 400" onChange={e => setPoolDetails({...poolDetails, price3Draws: Number(e.target.value)})} onBlur={e => handleUpdatePoolDetails('price3Draws', Number(e.target.value))} className="h-12 border-slate-200 font-code font-black text-lg text-slate-900 bg-white" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="pool-price-10" className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500">
+                                        {poolDetails.currency === 'p-point' ? <PPlusIcon className="h-4 w-4"/> : <Gem className="h-4 w-4 text-primary"/>}
+                                        十連抽優惠價
+                                    </Label>
+                                    <Input id="pool-price-10" type="number" value={poolDetails.price10Draws || ''} placeholder="例如: 1200" onChange={e => setPoolDetails({...poolDetails, price10Draws: Number(e.target.value)})} onBlur={e => handleUpdatePoolDetails('price10Draws', Number(e.target.value))} className="h-12 border-slate-200 font-code font-black text-lg text-slate-900 bg-white" />
                                 </div>
                             </div>
 

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useRequest, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Card } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -37,10 +37,12 @@ export default function CardsAdminAreaListPage() {
     const router = useRouter();
     const firestore = useFirestore();
 
-    const { data: allCards, isLoading: isLoadingCards } = useCollection<CardData>(useMemoFirebase(() => firestore ? collection(firestore, 'allCards') : null, [firestore]));
-    const { data: cardPools } = useCollection<{cards?: {cardId: string}[]}>(useMemoFirebase(() => firestore ? collection(firestore, 'cardPools') : null, [firestore]));
-    const { data: bettingItems } = useCollection<{allCardIds: string[]}>(useMemoFirebase(() => firestore ? collection(firestore, 'betting-items') : null, [firestore]));
-    const { data: luckBags } = useCollection<{prizes?: any, otherPrizes?: {cardId: string}[]}>(useMemoFirebase(() => firestore ? collection(firestore, 'luckBags') : null, [firestore]));
+    // Optimization: Use useRequest for summary counts on the admin area list.
+    // Static snapshots are sufficient for this overview and prevent excessive reads.
+    const { data: allCards, isLoading: isLoadingCards } = useRequest<CardData[]>(useMemoFirebase(() => firestore ? collection(firestore, 'allCards') : null, [firestore]));
+    const { data: cardPools } = useRequest<{cards?: {cardId: string}[]}[]>(useMemoFirebase(() => firestore ? collection(firestore, 'cardPools') : null, [firestore]));
+    const { data: bettingItems } = useRequest<{allCardIds: string[]}[]>(useMemoFirebase(() => firestore ? collection(firestore, 'betting-items') : null, [firestore]));
+    const { data: luckBags } = useRequest<{prizes?: any, otherPrizes?: {cardId: string}[]}[]>(useMemoFirebase(() => firestore ? collection(firestore, 'luckBags') : null, [firestore]));
 
     const counts = useMemo(() => {
         if (!allCards) return { draw: 0, betting: 0, 'lucky-bag': 0, 'group-break': 0, all: 0 };

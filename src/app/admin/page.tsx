@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Truck, Ticket, Archive, Gem, Package, Swords, Users2, Newspaper, UserCircle, ShoppingBag, Palette, ShieldCheck, Plus, LayoutList, BarChartHorizontal, ArrowUpRight, Megaphone, Trash2, AlertTriangle, FileText, Lock, Loader2 } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase, useDoc, useUser } from "@/firebase";
+import { useRequest, useFirestore, useMemoFirebase, useDoc, useUser } from "@/firebase";
 import { collection, doc, updateDoc, query, where, getDocs, writeBatch, deleteDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -145,24 +145,27 @@ export default function AdminPage() {
     const { user: currentUser } = useUser();
     const { toast } = useToast();
     
+    // Optimization: Use useRequest instead of useCollection for counts.
+    // Dashboard counts don't need real-time synchronization which consumes heavy reads.
     const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
-    const { data: users, isLoading: isLoadingUsers } = useCollection<GenericDoc>(usersQuery);
+    const { data: users, isLoading: isLoadingUsers } = useRequest<GenericDoc[]>(usersQuery);
 
     const luckBagsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'luckBags') : null, [firestore]);
-    const { data: luckBags, isLoading: isLoadingLuckBags } = useCollection<GenericDoc>(luckBagsQuery);
+    const { data: luckBags, isLoading: isLoadingLuckBags } = useRequest<GenericDoc[]>(luckBagsQuery);
 
     const cardPoolsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'cardPools') : null, [firestore]);
-    const { data: cardPools, isLoading: isLoadingCardPools } = useCollection<GenericDoc>(cardPoolsQuery);
+    const { data: cardPools, isLoading: isLoadingCardPools } = useRequest<GenericDoc[]>(cardPoolsQuery);
 
     const allCardsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'allCards') : null, [firestore]);
-    const { data: allCards, isLoading: isLoadingCards } = useCollection<any>(allCardsQuery);
+    const { data: allCards, isLoading: isLoadingCards } = useRequest<any[]>(allCardsQuery);
 
     const pendingShippingQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, 'shippingOrders'), where('status', '==', 'pending'));
     }, [firestore]);
-    const { data: pendingOrders, isLoading: isLoadingOrders } = useCollection<GenericDoc>(pendingShippingQuery);
+    const { data: pendingOrders, isLoading: isLoadingOrders } = useRequest<GenericDoc[]>(pendingShippingQuery);
     
+    // systemConfig is still a listener because it controls site-wide maintenance modes
     const systemConfigRef = useMemoFirebase(() => firestore ? doc(firestore, 'systemConfig', 'main') : null, [firestore]);
     const { data: systemConfig, isLoading: isLoadingSystemConfig, forceRefetch } = useDoc<SystemConfig>(systemConfigRef);
     const [announcement, setAnnouncement] = useState('');

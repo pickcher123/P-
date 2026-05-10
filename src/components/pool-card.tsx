@@ -377,48 +377,44 @@ export function PoolCard({ pool, allCardsMap, userProfile }: { pool: CardPool, a
                             {poolStatus.message || '無法抽卡'}
                         </Button>
                     ) : (
-                        <div className="grid grid-cols-1 gap-2.5">
-                            <Button 
-                                variant="outline" 
-                                className="w-full h-11 text-sm font-black rounded-2xl transition-all bg-white/5 border-white/10 border-b-4 border-slate-950 active:translate-y-1 active:border-b-0" 
-                                onClick={() => {
-                                    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-                                        window.navigator.vibrate(50);
-                                    }
-                                    handleDraw(1);
-                                }}
-                            >
-                                <span className="flex-1 text-center italic">
-                                    {`單抽 ${pool.price?.toLocaleString()}`}
-                                </span>
-                                {pool.currency === 'p-point' ? <PPlusIcon className="w-5 h-5 ml-2 text-amber-400" /> : (
-                                    <div className="relative flex items-center justify-center w-7 h-7 ml-2 rounded-full bg-sky-500/30 border border-sky-400/50">
-                                        <Gem className="w-4 h-4 text-sky-300" />
-                                    </div>
-                                )}
-                            </Button>
-                            <Button 
-                                className={cn(
-                                    "w-full h-14 text-xl font-black rounded-2xl transition-all active:translate-y-1 active:border-b-0",
-                                    !canDraw3 ? "bg-slate-800 text-slate-500 border-slate-700 opacity-50" : "bg-primary text-primary-foreground border-b-[6px] border-slate-950"
-                                )} 
-                                disabled={!canDraw3} 
-                                onClick={() => {
-                                    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-                                        window.navigator.vibrate([50, 50, 50]);
-                                    }
-                                    handleDraw(Math.min(3, pool.remainingPacks || 0));
-                                }}
-                            >
-                                <span className="flex-1 text-center italic">
-                                    {!canDraw3 ? '今日額度不足三抽' : `${Math.min(3, pool.remainingPacks || 0)}連抽 ${((Math.min(3, pool.remainingPacks || 0) === 3 ? pool.price3Draws : (pool.price || 0) * (Math.min(3, pool.remainingPacks || 0))) || 0).toLocaleString()}`}
-                                </span>
-                                {canDraw3 && (pool.currency === 'p-point' ? <PPlusIcon className="w-7 h-7 ml-2 text-amber-400" /> : (
-                                    <div className="relative flex items-center justify-center w-9 h-9 ml-2 rounded-full bg-sky-500/30 border border-sky-400/50">
-                                        <Gem className="w-6 h-6 text-sky-300" />
-                                    </div>
-                                ))}
-                            </Button>
+                        <div className="grid grid-cols-3 gap-2">
+                            {[1, 3, 10].map((drawCount) => {
+                                const canDraw = !isLoadingStats && (!pool.dailyLimit || pool.dailyLimit === 0 || (todayDrawCount + drawCount <= pool.dailyLimit));
+                                const price = drawCount === 1 ? (pool.price || 0) 
+                                            : drawCount === 3 ? (pool.price3Draws || (pool.price || 0) * 3) 
+                                            : (pool.price10Draws || (pool.price || 0) * 10);
+                                const label = drawCount === 1 ? '單抽' : `${drawCount}連`;
+                                const drawsToPerform = Math.min(drawCount, pool.remainingPacks || 0);
+                                
+                                return (
+                                    <Button 
+                                        key={drawCount}
+                                        className={cn(
+                                            "w-full h-24 flex flex-col items-center justify-center gap-1.5 rounded-2xl transition-all active:translate-y-1 active:border-b-0 px-2",
+                                            !canDraw 
+                                                ? "bg-slate-800 text-slate-500 border-slate-700 opacity-50" 
+                                                : "bg-primary text-primary-foreground border-b-4 border-slate-950"
+                                        )} 
+                                        disabled={!canDraw} 
+                                        onClick={() => {
+                                            if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+                                                window.navigator.vibrate([25 * drawsToPerform]);
+                                            }
+                                            handleDraw(drawsToPerform);
+                                        }}
+                                    >
+                                        <span className="text-[10px] font-bold uppercase opacity-80">{label}</span>
+                                        <span className="text-sm font-black italic">
+                                            {price.toLocaleString()}
+                                        </span>
+                                        {pool.currency === 'p-point' ? <PPlusIcon className="w-5 h-5 text-amber-400" /> : (
+                                            <div className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/20 border border-white/10">
+                                                <Gem className="w-3.5 h-3.5 text-sky-300" />
+                                            </div>
+                                        )}
+                                    </Button>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

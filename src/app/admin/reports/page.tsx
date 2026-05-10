@@ -1,10 +1,10 @@
 'use client';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
-import { collection, query, orderBy } from "firebase/firestore";
+import { useRequest, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy, where, Timestamp } from "firebase/firestore";
 import { useMemo, useState } from "react";
-import { Gem, ShoppingCart, Users, BarChart, Calendar, ArrowDownRight, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { Gem, ShoppingCart, Users, BarChart, Calendar, ArrowDownRight, TrendingUp, ArrowUpRight, Loader2 } from 'lucide-react';
 import { getYear, getMonth, startOfMonth, endOfMonth } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Bar, BarChart as RechartsBarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -43,24 +43,33 @@ export default function ReportsPage() {
     const [currentYear, setCurrentYear] = useState(getYear(new Date()).toString());
     const [currentMonth, setCurrentMonth] = useState(getMonth(new Date()).toString());
 
+    const { monthStart, monthEnd } = useMemo(() => {
+        const selectedDate = new Date(parseInt(currentYear), parseInt(currentMonth));
+        return {
+            monthStart: startOfMonth(selectedDate),
+            monthEnd: endOfMonth(selectedDate)
+        };
+    }, [currentYear, currentMonth]);
+
     const transactionsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        return query(collection(firestore, 'transactions'), orderBy('transactionDate', 'desc'));
-    }, [firestore]);
+        // Optimization: Filter by date on server side to reduce data transfer and read count
+        return query(
+            collection(firestore, 'transactions'), 
+            where('transactionDate', '>=', Timestamp.fromDate(monthStart)),
+            where('transactionDate', '<=', Timestamp.fromDate(monthEnd)),
+            orderBy('transactionDate', 'desc')
+        );
+    }, [firestore, monthStart, monthEnd]);
 
-    const { data: allTransactions, isLoading } = useCollection<Transaction>(transactionsQuery);
+    // Optimization: Use useRequest (one-time get) instead of useCollection (real-time snapshot)
+    // for historical report data which doesn't change frequently.
+    const { data: allTransactions, isLoading } = useRequest<Transaction[]>(transactionsQuery);
 
     const { reportStats, chartData } = useMemo(() => {
         if (!allTransactions) return { reportStats: { totalIncome: 0, totalConsumption: 0, totalIssuedValue: 0, netIncome: 0, activePlayers: 0 }, chartData: [] };
-        const selectedDate = new Date(parseInt(currentYear), parseInt(currentMonth));
-        const monthStart = startOfMonth(selectedDate);
-        const monthEnd = endOfMonth(selectedDate);
         
-        const filteredTransactions = allTransactions.filter(tx => {
-            if (!tx.transactionDate) return false;
-            const txDate = new Date(tx.transactionDate.seconds * 1000);
-            return txDate >= monthStart && txDate <= monthEnd;
-        });
+        const filteredTransactions = allTransactions; // Already filtered by date in Firestore query
         
         const dailyIncome: { [key: string]: number } = {};
         for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
@@ -68,7 +77,7 @@ export default function ReportsPage() {
         }
 
         const activePlayerIds = new Set<string>();
-        const stats = filteredTransactions.reduce((acc, tx) => {
+        const stats = filteredTransactions.reduce((acc: any, tx: Transaction) => {
             if (tx.transactionType === 'Deposit' && tx.section === 'deposit' && tx.status === 'completed') {
                 acc.totalIncome += tx.amount;
                 const txDate = new Date(tx.transactionDate.seconds * 1000);
@@ -84,12 +93,15 @@ export default function ReportsPage() {
             reportStats: { ...stats, netIncome: stats.totalIncome - stats.totalIssuedValue, activePlayers: activePlayerIds.size },
             chartData: Object.entries(dailyIncome).map(([day, value]) => ({ day: `${day}日`, value })),
         };
-    }, [allTransactions, currentYear, currentMonth]);
+    }, [allTransactions, monthStart, monthEnd]);
     
     return (
         <div className="space-y-8 text-slate-900">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 className="text-3xl font-black tracking-tight">營業報表</h1>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-3xl font-black tracking-tight">營業報表</h1>
+                    {isLoading && <Loader2 className="w-5 h-5 animate-spin text-slate-400" />}
+                </div>
                 <div className="flex gap-2">
                     <Select value={currentYear} onValueChange={setCurrentYear}>
                         <SelectTrigger className="w-[120px] bg-white border-slate-200 font-bold"><Calendar className="w-4 h-4 mr-2" /><SelectValue /></SelectTrigger>

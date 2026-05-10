@@ -450,6 +450,7 @@ export default function OpenPackPage() {
     const visual = currentPrize ? (rarityVisuals[currentPrize.rarity] || rarityVisuals.common) : rarityVisuals.common;
 
     const canDraw3 = !isLoadingStats && (!cardPool?.dailyLimit || cardPool.dailyLimit === 0 || (todayDrawCount + 3 <= cardPool.dailyLimit));
+    const canDraw10 = !isLoadingStats && (!cardPool?.dailyLimit || cardPool.dailyLimit === 0 || (todayDrawCount + 10 <= cardPool.dailyLimit));
 
     return (
         <div className="flex flex-col items-center h-screen p-2 pt-2 relative overflow-hidden select-none touch-none justify-start md:justify-center" style={{ backgroundImage: 'url("/draw_background.png")', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
@@ -682,6 +683,7 @@ export default function OpenPackPage() {
                                             isLoadingStats={isLoadingStats}
                                             isLimitReachedForSingle={isLimitReachedForSingle}
                                             canDraw3={canDraw3}
+                                            canDraw10={canDraw10}
                                             cardPool={cardPool}
                                             performDraw={performDraw}
                                         />

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { useCollection, useRequest, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, doc, updateDoc, writeBatch, serverTimestamp, increment, where, limit } from 'firebase/firestore';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -107,9 +107,13 @@ function UserDetailsDialog({ user }: { user: UserProfile }) {
 
     const txQuery = useMemoFirebase(() => {
         if (!firestore || !isOpen) return null;
-        return query(collection(firestore, 'transactions'), where('userId', '==', user.id));
+        return query(collection(firestore, 'transactions'), where('userId', '==', user.id), limit(50));
     }, [firestore, user.id, isOpen]);
-    const { data: rawTransactions, isLoading: isLoadingTx } = useCollection<Transaction>(txQuery);
+    
+    // Optimization: Transactions are historical data. 
+    // Using useRequest (one-time fetch) instead of useCollection (real-time listener)
+    // saves significant reads as admins browse through many user records.
+    const { data: rawTransactions, isLoading: isLoadingTx } = useRequest<Transaction[]>(txQuery);
 
     const sortedTransactions = useMemo(() => {
         if (!rawTransactions) return [];
@@ -120,7 +124,7 @@ function UserDetailsDialog({ user }: { user: UserProfile }) {
         if (!firestore || !isOpen) return null;
         return query(collection(firestore, 'shippingOrders'), where('userId', '==', user.id));
     }, [firestore, user.id, isOpen]);
-    const { data: rawOrders, isLoading: isLoadingShipping } = useCollection<ShippingOrder>(shippingQuery);
+    const { data: rawOrders, isLoading: isLoadingShipping } = useRequest<ShippingOrder[]>(shippingQuery);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { SafeImage } from '@/components/safe-image';
 import { Button } from '@/components/ui/button';
 import { Layers, Gem, Package, Disc3, Info, Sparkles, ChevronRight, Star, Trophy, Clock, Settings } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase, useDoc, useUser } from "@/firebase";
+import { useCollection, useRequest, useFirestore, useMemoFirebase, useDoc, useUser } from "@/firebase";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -73,8 +73,10 @@ export default function DrawPage() {
   const { data: categories, isLoading: isLoadingCategories } = useCollection<DrawCategory>(categoriesQuery);
   const { data: cardPools, isLoading: isLoadingPools } = useCollection<CardPool>(useMemoFirebase(() => firestore ? collection(firestore, 'cardPools') : null, [firestore]));
   
-  // 修正：確保包含 isSold 狀態
-  const { data: allCards } = useCollection<{id: string, name: string, imageUrl: string, isSold?: boolean}>(useMemoFirebase(() => firestore ? collection(firestore, 'allCards') : null, [firestore]));
+  // Optimization: allCards is a massive collection (can reach thousands of docs). 
+  // Using useCollection here causes every user to re-read the entire collection 
+  // on every card state update system-wide. We switch to useRequest for single fetch.
+  const { data: allCards } = useRequest<{id: string, name: string, imageUrl: string, isSold?: boolean}[]>(useMemoFirebase(() => firestore ? collection(firestore, 'allCards') : null, [firestore]));
 
   const allCardsMap = useMemo(() => {
     if (!allCards) return new Map();
